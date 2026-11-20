@@ -1,0 +1,32 @@
+{
+  "id": "bohemian-art-nouveau-dark",
+  "label": "Bohemian Art Nouveau Dark",
+  "mode": "dark",
+  "seeds": {
+    "background": "#162B37",
+    "foreground": "#EFE4D2",
+    "primary": "#D4A853",
+    "primary_foreground": "#162B37",
+    "code_foreground": "#DFBE7A"
+  },
+  "syntax": {
+    "comment": "#7B8C7E",
+    "punctuation": "#C8BEAF",
+    "property": "#C29B53",
+    "deleted": "#C66347",
+    "inserted": "#7B8C7E",
+    "tag": "#D6A692",
+    "constant": "#C78A3A",
+    "number": "#D99330",
+    "string": "#E8BA9B",
+    "attrName": "#D6A692",
+    "builtin": "#B38B40",
+    "operator": "#E0D9CE",
+    "variable": "#EFE4D2",
+    "attrValue": "#E8BA9B",
+    "keyword": "#A89FAD",
+    "function": "#D4A853",
+    "className": "#DFBE7A",
+    "regex": "#AD734A"
+  }
+}

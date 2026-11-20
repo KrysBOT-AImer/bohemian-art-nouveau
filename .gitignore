@@ -1,0 +1,32 @@
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS & editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local backups & temporary release packaging
+*.bak
+*.tmp
+SHA256SUMS.txt
+bohemian-art-nouveau-v*.zip
+bohemian-art-nouveau-v*.tar.gz

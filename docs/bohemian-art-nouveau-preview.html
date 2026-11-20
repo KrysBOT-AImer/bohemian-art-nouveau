@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bohemian Art Nouveau — Antigravity 2 Interactive Preview</title>
+  <style>
+    :root {
+      --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-serif: Georgia, "Times New Roman", serif;
+      --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+
+      /* Outer page chrome (neutral studio frame around the simulated app) */
+      --studio-bg: #11161b;
+      --studio-surface: #182026;
+      --studio-border: rgba(255, 255, 255, 0.1);
+      --studio-text: #ece7df;
+      --studio-muted: #9da8b1;
+      --studio-accent: #d4a853;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--studio-bg);
+      color: var(--studio-text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid var(--studio-accent);
+      outline-offset: 2px;
+    }
+
+    /* Top Control Bar */
+    .control-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 20px;
+      padding: 12px 20px;
+      background: rgba(17, 22, 27, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--studio-border);
+    }
+
+    .brand-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1A3644 0%, #162B37 55%, #D4A853 100%);
+      border: 1px solid rgba(212, 168, 83, 0.45);
+      display: grid;
+      place-items: center;
+      color: #F3EFE8;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #F3EFE8;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--studio-muted);
+      display: block;
+    }
+
+    .ratio-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(212, 168, 83, 0.12);
+      border: 1px solid rgba(212, 168, 83, 0.3);
+      color: #DFBE7A;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .segmented-toggle {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 10px;
+      background: #0d1216;
+      border: 1px solid var(--studio-border);
+      gap: 2px;
+    }
+
+    .segmented-toggle button {
+      border: 0;
+      background: transparent;
+      color: var(--studio-muted);
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background-color 0.16s ease, color 0.16s ease;
+      white-space: nowrap;
+    }
+
+    .segmented-toggle button[aria-pressed="true"] {
+      background: #24333d;
+      color: #F3EFE8;
+      box-shadow: inset 0 0 0 1px rgba(212, 168, 83, 0.35);
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Simulated Antigravity 2 Desktop Window (occ() + b1()) */
+    .ag-window {
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--shell);
+      color: var(--foreground);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .ag-window[data-mode="light"] {
+      --background: #F3EFE8;
+      --foreground: #162B37;
+      --primary: #1A3644;
+      --primary-foreground: #F3EFE8;
+      --code-foreground: #6C4F3D;
+      --shell: color-mix(in srgb, #0a0a0c 2%, var(--background));
+      --sidebar: color-mix(in srgb, #0a0a0c 4.8%, var(--background));
+      --card: color-mix(in srgb, var(--background) 30%, #ffffff);
+      --muted: color-mix(in srgb, #000000 4%, var(--background));
+      --muted-foreground: color-mix(in srgb, var(--foreground) 64%, var(--background));
+      --border: rgba(0, 0, 0, 0.075);
+      --border-strong: rgba(0, 0, 0, 0.12);
+    }
+
+    .ag-window[data-mode="dark"] {
+      --background: #162B37;
+      --foreground: #EFE4D2;
+      --primary: #D4A853;
+      --primary-foreground: #162B37;
+      --code-foreground: #DFBE7A;
+      --shell: color-mix(in srgb, #ffffff 4%, var(--background));
+      --sidebar: color-mix(in srgb, #ffffff 4.6%, var(--background));
+      --card: color-mix(in srgb, #ffffff 5.6%, var(--background));
+      --muted: color-mix(in srgb, #ffffff 4%, var(--background));
+      --muted-foreground: color-mix(in srgb, var(--foreground) 58%, var(--background));
+      --border: rgba(255, 255, 255, 0.05);
+      --border-strong: rgba(255, 255, 255, 0.1);
+    }
+
+    .ag-window button:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Window Titlebar (--shell) */
+    .ag-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--shell);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--muted-foreground);
+    }
+
+    .ag-window-dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .ag-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      display: inline-block;
+    }
+
+    .ag-titlebar-center {
+      font-weight: 600;
+      color: var(--foreground);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ag-mode-chip {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      color: var(--muted-foreground);
+      font-weight: 600;
+    }
+
+    /* 3-Pane Desktop Shell */
+    .ag-body {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr) 320px;
+      min-height: 620px;
+    }
+
+    /* Left Sidebar (--sidebar) */
+    .ag-sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+    }
+
+    .btn-secondary {
+      background: var(--muted);
+      color: var(--foreground);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+    }
+
+    .sidebar-section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-foreground);
+      padding: 0 8px 6px;
+    }
+
+    .sidebar-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      color: var(--foreground);
+    }
+
+    .sidebar-item.is-active {
+      background: var(--muted);
+      border: 1px solid var(--border-strong);
+      font-weight: 600;
+    }
+
+    .sidebar-item-muted {
+      color: var(--muted-foreground);
+      font-size: 0.74rem;
+    }
+
+    .plugin-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--primary) 16%, transparent);
+      color: var(--primary);
+      border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+      white-space: nowrap;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Main Chat Canvas (--background) */
+    .ag-main {
+      background: var(--background);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .ag-canvas-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ag-canvas-title {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+
+    .ag-muted-strip {
+      background: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      color: var(--muted-foreground);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ag-muted-strip strong {
+      color: var(--foreground);
+    }
+
+    .chat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: var(--muted-foreground);
+      font-weight: 600;
+    }
+
+    .chat-card p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--foreground);
+    }
+
+    .inline-code {
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      color: var(--code-foreground);
+    }
+
+    /* Prism-style Code + Diff Surface */
+    .code-panel {
+      border-radius: 9px;
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      background: var(--card);
+    }
+
+    .code-panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+      font-family: var(--font-mono);
+    }
+
+    .code-pre {
+      margin: 0;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.81rem;
+      line-height: 1.6;
+      color: var(--foreground);
+      background: var(--card);
+    }
+
+    .diff-line {
+      display: block;
+      margin: 0 -16px;
+      padding: 0 16px;
+    }
+
+    .diff-line-del {
+      background: color-mix(in srgb, var(--syntax-deleted) 12%, transparent);
+    }
+
+    .diff-line-ins {
+      background: color-mix(in srgb, var(--syntax-inserted) 14%, transparent);
+    }
+
+    /* 18 Syntax Token Classes */
+    .tok-comment { color: var(--syntax-comment); font-style: italic; }
+    .tok-punctuation { color: var(--syntax-punctuation); }
+    .tok-property { color: var(--syntax-property); }
+    .tok-deleted { color: var(--syntax-deleted); }
+    .tok-inserted { color: var(--syntax-inserted); }
+    .tok-tag { color: var(--syntax-tag); }
+    .tok-constant { color: var(--syntax-constant); }
+    .tok-number { color: var(--syntax-number); }
+    .tok-string { color: var(--syntax-string); }
+    .tok-attrName { color: var(--syntax-attrName); }
+    .tok-builtin { color: var(--syntax-builtin); }
+    .tok-operator { color: var(--syntax-operator); }
+    .tok-variable { color: var(--syntax-variable); }
+    .tok-attrValue { color: var(--syntax-attrValue); }
+    .tok-keyword { color: var(--syntax-keyword); font-weight: 600; }
+    .tok-function { color: var(--syntax-function); font-weight: 600; }
+    .tok-className { color: var(--syntax-className); font-weight: 600; }
+    .tok-regex { color: var(--syntax-regex); }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Right Pane: Settings -> Appearance Quick-Copy Card */
+    .ag-right-pane {
+      background: var(--sidebar);
+      border-left: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .settings-heading {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+
+    .preset-callout {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-left: 3px solid var(--primary);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: var(--foreground);
+      line-height: 1.45;
+    }
+
+    .seed-group-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted-foreground);
+      margin-bottom: 6px;
+    }
+
+    .seed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .seed-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .seed-info {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .seed-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      flex-shrink: 0;
+    }
+
+    .seed-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--foreground);
+      display: block;
+    }
+
+    .seed-hex {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--muted-foreground);
+    }
+
+    .copy-btn {
+      border: 1px solid var(--border-strong);
+      background: var(--muted);
+      color: var(--foreground);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .copy-btn.is-copied {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+
+    /* Lower Diagnostics Grid: WCAG Contrast Matrix + 18-Token Swatch Inspector */
+    .diagnostics-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+      gap: 20px;
+    }
+
+    .diag-card {
+      background: var(--studio-surface);
+      border: 1px solid var(--studio-border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .diag-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .diag-title {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #F3EFE8;
+    }
+
+    .diag-sub {
+      font-size: 0.76rem;
+      color: var(--studio-muted);
+    }
+
+    .wcag-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .wcag-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--studio-muted);
+      padding: 0 8px 8px 0;
+      border-bottom: 1px solid var(--studio-border);
+    }
+
+    .wcag-table td {
+      padding: 8px 8px 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+    }
+
+    .pair-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pair-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 22px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .ratio-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #F3EFE8;
+    }
+
+    .wcag-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.69rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-aaa {
+      background: rgba(123, 140, 126, 0.22);
+      color: #b7ceb9;
+      border: 1px solid rgba(123, 140, 126, 0.45);
+    }
+
+    .badge-aa {
+      background: rgba(212, 168, 83, 0.18);
+      color: #DFBE7A;
+      border: 1px solid rgba(212, 168, 83, 0.4);
+    }
+
+    .badge-large {
+      background: rgba(198, 99, 71, 0.2);
+      color: #e8a491;
+      border: 1px solid rgba(198, 99, 71, 0.45);
+    }
+
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 9px;
+    }
+
+    .token-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background-color 0.2s ease;
+    }
+
+    .token-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .token-meta {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .token-name {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .token-detail {
+      font-family: var(--font-mono);
+      font-size: 0.69rem;
+      opacity: 0.85;
+    }
+
+    @media (max-width: 1120px) {
+      .ag-body {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+      .ag-right-pane {
+        grid-column: 1 / -1;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+      .diagnostics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .ag-body {
+        grid-template-columns: 1fr;
+      }
+      .ag-sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .workspace {
+        padding: 12px;
+      }
+      .control-bar {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="control-bar">
+    <div class="brand-group">
+      <div class="brand-mark" aria-hidden="true">B</div>
+      <div>
+        <h1 class="brand-title">Bohemian Art Nouveau — Antigravity 2 Preview</h1>
+        <span class="brand-subtitle">Offline Surface Engine Simulation (<code>occ()</code> + <code>b1()</code>) &amp; 18-Token Inspector</span>
+      </div>
+      <span class="ratio-pill">60-25-10-5 Architectural Ratio</span>
+    </div>
+
+    <div class="controls-group">
+      <div class="segmented-toggle" role="group" aria-label="Color Temperature Mode">
+        <button type="button" id="btn-mode-light" aria-pressed="true">Light (4000K Day)</button>
+        <button type="button" id="btn-mode-dark" aria-pressed="false">Dark (2700K Evening)</button>
+      </div>
+      <div class="segmented-toggle" role="group" aria-label="Syntax Highlighting Mode">
+        <button type="button" id="btn-syntax-bohemian" aria-pressed="true">Full Plugin Syntax (18 Bohemian Tokens)</button>
+        <button type="button" id="btn-syntax-ga" aria-pressed="false">GA Today (Gruvbox Material Preset)</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Simulated Antigravity 2 Desktop Window -->
+    <section class="ag-window" id="ag-window" data-mode="light" aria-label="Antigravity 2 Desktop Application Mockup">
+      <div class="ag-titlebar">
+        <div class="ag-window-dots" aria-hidden="true">
+          <span class="ag-dot"></span>
+          <span class="ag-dot"></span>
+          <span class="ag-dot"></span>
+        </div>
+        <div class="ag-titlebar-center">
+          <span>Antigravity 2 — Bohemian Art Nouveau</span>
+          <span class="ag-mode-chip" id="chip-active-mode">4000K Day · Full Plugin</span>
+        </div>
+        <span class="ag-mode-chip">v2.33.0 Engine</span>
+      </div>
+
+      <div class="ag-body">
+        <!-- Left Sidebar -->
+        <aside class="ag-sidebar" aria-label="Workspace Sidebar">
+          <button type="button" class="btn-primary">+ New Conversation</button>
+
+          <div>
+            <div class="sidebar-section-label">Projects</div>
+            <ul class="sidebar-list">
+              <li class="sidebar-item is-active">
+                <span>bohemian-art-nouveau</span>
+                <span class="sidebar-item-muted">active</span>
+              </li>
+              <li class="sidebar-item">
+                <span>surface-engine-lab</span>
+                <span class="sidebar-item-muted">2m</span>
+              </li>
+              <li class="sidebar-item">
+                <span>typography-audit</span>
+                <span class="sidebar-item-muted">1h</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="sidebar-section-label">Scheduled Tasks</div>
+            <ul class="sidebar-list">
+              <li class="sidebar-item">
+                <span>WCAG Contrast Check</span>
+                <span class="sidebar-item-muted">Daily</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="sidebar-section-label">Skills &amp; Customizations</div>
+            <ul class="sidebar-list">
+              <li class="sidebar-item">
+                <span>Bohemian Art Nouveau</span>
+                <span class="plugin-badge">Plugin</span>
+              </li>
+              <li class="sidebar-item">
+                <span>Syntax Token Mapper</span>
+                <span class="sidebar-item-muted">18</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-item is-active">
+              <span>Settings → Appearance</span>
+              <span class="sidebar-item-muted">Open</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Chat Canvas -->
+        <div class="ag-main">
+          <div class="ag-canvas-header">
+            <h2 class="ag-canvas-title">Surface &amp; Syntax Verification Thread</h2>
+            <div class="action-row">
+              <button type="button" class="btn-secondary">Inspect Tokens</button>
+              <button type="button" class="btn-primary">Apply Theme</button>
+            </div>
+          </div>
+
+          <div class="ag-muted-strip">
+            <span><strong>Engine Contract:</strong> Surfaces derive dynamically via <code class="inline-code">color-mix(in srgb, ...)</code> from 3 UI seeds.</span>
+            <span id="syntax-mode-note">Showing 18-token Bohemian Art Nouveau syntax</span>
+          </div>
+
+          <article class="chat-card">
+            <div class="chat-card-meta">
+              <span>USER</span>
+              <span>4000K / 2700K Parity</span>
+            </div>
+            <p>
+              Verify that <code class="inline-code">--code-foreground</code>, <code class="inline-code">--muted-foreground</code>, and all 18 Prism syntax tokens remain legible on <code class="inline-code">--card</code> across both daylight and evening modes.
+            </p>
+          </article>
+
+          <article class="chat-card">
+            <div class="chat-card-meta">
+              <span>ASSISTANT · BOHEMIAN ART NOUVEAU</span>
+              <span>All 18 Tokens Active</span>
+            </div>
+            <p>
+              Below is a combined TypeScript, JSX, regex, and unified diff snippet exercising every token in <code class="inline-code">BOHEMIAN_SYNTAX</code> versus <code class="inline-code">GA_GRUVBOX_SYNTAX</code>:
+            </p>
+
+            <div class="code-panel">
+              <div class="code-panel-header">
+                <span>theme-engine.tsx</span>
+                <span id="code-header-badge">BOHEMIAN_SYNTAX</span>
+              </div>
+              <pre class="code-pre"><code><span class="tok-comment">// Architectural 60-25-10-5 palette resolver for Antigravity 2</span>
+<span class="tok-keyword">export</span> <span class="tok-keyword">class</span> <span class="tok-className">SurfaceResolver</span> <span class="tok-punctuation">{</span>
+  <span class="tok-keyword">private</span> <span class="tok-keyword">readonly</span> <span class="tok-property">kelvin</span><span class="tok-operator">:</span> <span class="tok-builtin">number</span> <span class="tok-operator">=</span> <span class="tok-number">4000</span><span class="tok-punctuation">;</span>
+  <span class="tok-keyword">private</span> <span class="tok-keyword">readonly</span> <span class="tok-property">pattern</span> <span class="tok-operator">=</span> <span class="tok-regex">/^#[0-9A-F]{6}$/i</span><span class="tok-punctuation">;</span>
+
+  <span class="tok-function">renderPreview</span><span class="tok-punctuation">(</span><span class="tok-variable">seed</span><span class="tok-operator">:</span> <span class="tok-builtin">string</span><span class="tok-punctuation">,</span> <span class="tok-variable">strict</span> <span class="tok-operator">=</span> <span class="tok-constant">true</span><span class="tok-punctuation">)</span> <span class="tok-punctuation">{</span>
+    <span class="tok-keyword">const</span> <span class="tok-variable">label</span> <span class="tok-operator">=</span> <span class="tok-string">"Bohemian Art Nouveau"</span><span class="tok-punctuation">;</span>
+    <span class="tok-keyword">if</span> <span class="tok-punctuation">(</span><span class="tok-operator">!</span><span class="tok-keyword">this</span><span class="tok-punctuation">.</span><span class="tok-property">pattern</span><span class="tok-punctuation">.</span><span class="tok-function">test</span><span class="tok-punctuation">(</span><span class="tok-variable">seed</span><span class="tok-punctuation">)</span> <span class="tok-operator">&amp;&amp;</span> <span class="tok-variable">strict</span><span class="tok-punctuation">)</span> <span class="tok-keyword">return</span> <span class="tok-constant">null</span><span class="tok-punctuation">;</span>
+    <span class="tok-keyword">return</span> <span class="tok-tag">&lt;ThemeCard</span> <span class="tok-attrName">data-mode</span><span class="tok-operator">=</span><span class="tok-attrValue">"daylight"</span> <span class="tok-attrName">title</span><span class="tok-operator">=</span><span class="tok-punctuation">{</span><span class="tok-variable">label</span><span class="tok-punctuation">}</span> <span class="tok-tag">/&gt;</span><span class="tok-punctuation">;</span>
+  <span class="tok-punctuation">}</span>
+<span class="tok-punctuation">}</span>
+<span class="diff-line diff-line-del"><span class="tok-deleted">- --primary: #9E6B47; /* legacy low-contrast draft */</span></span>
+<span class="diff-line diff-line-ins"><span class="tok-inserted">+ --primary: #1A3644; /* Prussian Ink AAA anchor */</span></span></code></pre>
+            </div>
+          </article>
+        </div>
+
+        <!-- Right Pane: Settings -> Appearance Quick-Copy Card -->
+        <aside class="ag-right-pane" aria-label="Settings Appearance Quick-Copy">
+          <h3 class="settings-heading">Settings → Appearance</h3>
+
+          <div class="preset-callout">
+            <strong>Step 1:</strong> Select the <code class="inline-code">Gruvbox Material</code> preset FIRST (switching presets resets custom seeds).<br>
+            <strong>Step 2:</strong> Paste these 3 hex values:
+          </div>
+
+          <div>
+            <div class="seed-group-title">UI-Editable Seeds</div>
+            <div class="seed-list" id="ui-seed-list"></div>
+          </div>
+
+          <div>
+            <div class="seed-group-title">Config / Plugin-Level Overrides</div>
+            <div class="seed-list" id="override-seed-list"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Lower Diagnostics: Live WCAG Contrast Matrix & 18-Token Swatch Inspector -->
+    <section class="diagnostics-grid" aria-label="Contrast and Token Diagnostics">
+      <div class="diag-card">
+        <div class="diag-header">
+          <h2 class="diag-title">Live WCAG 2.1 Contrast Matrix</h2>
+          <span class="diag-sub" id="wcag-mode-label">4000K Day (Light)</span>
+        </div>
+        <table class="wcag-table">
+          <thead>
+            <tr>
+              <th>Surface Pair</th>
+              <th>Sample</th>
+              <th>Ratio</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody id="wcag-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="diag-card">
+        <div class="diag-header">
+          <h2 class="diag-title">18-Token Syntax Swatch Inspector</h2>
+          <span class="diag-sub" id="inspector-mode-label">BOHEMIAN_SYNTAX · Contrast vs --card</span>
+        </div>
+        <div class="token-grid" id="token-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const THEME_SEEDS = {
+        light: {
+          label: "4000K Day",
+          background: "#F3EFE8",
+          foreground: "#162B37",
+          primary: "#1A3644",
+          primaryForeground: "#F3EFE8",
+          codeForeground: "#6C4F3D"
+        },
+        dark: {
+          label: "2700K Evening",
+          background: "#162B37",
+          foreground: "#EFE4D2",
+          primary: "#D4A853",
+          primaryForeground: "#162B37",
+          codeForeground: "#DFBE7A"
+        }
+      };
+
+      const BOHEMIAN_SYNTAX = {
+        light: {
+          comment: "#7B8C7E",
+          punctuation: "#6C4F3D",
+          property: "#9E6B47",
+          deleted: "#B85D43",
+          inserted: "#7B8C7E",
+          tag: "#4E3242",
+          constant: "#B85D43",
+          number: "#B85D43",
+          string: "#6C4F3D",
+          attrName: "#9E6B47",
+          builtin: "#946F2D",
+          operator: "#2A2C30",
+          variable: "#162B37",
+          attrValue: "#7A4D33",
+          keyword: "#5A3D4D",
+          function: "#1A3644",
+          className: "#946F2D",
+          regex: "#7A4D33"
+        },
+        dark: {
+          comment: "#7B8C7E",
+          punctuation: "#C8BEAF",
+          property: "#C29B53",
+          deleted: "#C66347",
+          inserted: "#7B8C7E",
+          tag: "#D6A692",
+          constant: "#C78A3A",
+          number: "#D99330",
+          string: "#E8BA9B",
+          attrName: "#D6A692",
+          builtin: "#B38B40",
+          operator: "#E0D9CE",
+          variable: "#EFE4D2",
+          attrValue: "#E8BA9B",
+          keyword: "#A89FAD",
+          function: "#D4A853",
+          className: "#DFBE7A",
+          regex: "#AD734A"
+        }
+      };
+
+      const GA_GRUVBOX_SYNTAX = {
+        light: {
+          comment: "#928374",
+          punctuation: "#7C6F64",
+          property: "#427B58",
+          deleted: "#C14A4A",
+          inserted: "#6C782E",
+          tag: "#C14A4A",
+          constant: "#945E80",
+          number: "#945E80",
+          string: "#6C782E",
+          attrName: "#B47109",
+          builtin: "#45707A",
+          operator: "#654735",
+          variable: "#3C3836",
+          attrValue: "#6C782E",
+          keyword: "#C14A4A",
+          function: "#427B58",
+          className: "#B47109",
+          regex: "#C35E0A"
+        },
+        dark: {
+          comment: "#928374",
+          punctuation: "#A89984",
+          property: "#89B482",
+          deleted: "#EA6962",
+          inserted: "#A9B665",
+          tag: "#EA6962",
+          constant: "#D3869B",
+          number: "#D3869B",
+          string: "#A9B665",
+          attrName: "#D8A657",
+          builtin: "#7DAEA3",
+          operator: "#E78A4E",
+          variable: "#D4BE98",
+          attrValue: "#A9B665",
+          keyword: "#EA6962",
+          function: "#A9B665",
+          className: "#D8A657",
+          regex: "#E78A4E"
+        }
+      };
+
+      const TOKEN_ORDER = [
+        "comment", "punctuation", "property", "deleted", "inserted", "tag",
+        "constant", "number", "string", "attrName", "builtin", "operator",
+        "variable", "attrValue", "keyword", "function", "className", "regex"
+      ];
+
+      let currentMode = "light";
+      let currentSyntax = "bohemian";
+
+      const agWindow = document.getElementById("ag-window");
+      const btnModeLight = document.getElementById("btn-mode-light");
+      const btnModeDark = document.getElementById("btn-mode-dark");
+      const btnSyntaxBohemian = document.getElementById("btn-syntax-bohemian");
+      const btnSyntaxGa = document.getElementById("btn-syntax-ga");
+      const chipActiveMode = document.getElementById("chip-active-mode");
+      const syntaxModeNote = document.getElementById("syntax-mode-note");
+      const codeHeaderBadge = document.getElementById("code-header-badge");
+      const uiSeedList = document.getElementById("ui-seed-list");
+      const overrideSeedList = document.getElementById("override-seed-list");
+      const wcagTbody = document.getElementById("wcag-tbody");
+      const wcagModeLabel = document.getElementById("wcag-mode-label");
+      const tokenGrid = document.getElementById("token-grid");
+      const inspectorModeLabel = document.getElementById("inspector-mode-label");
+
+      function hexToRgb(hex) {
+        const clean = hex.replace("#", "");
+        const num = parseInt(clean, 16);
+        return {
+          r: (num >> 16) & 255,
+          g: (num >> 8) & 255,
+          b: num & 255
+        };
+      }
+
+      function rgbToHex(rgb) {
+        const toHex = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0").toUpperCase();
+        return "#" + toHex(rgb.r) + toHex(rgb.g) + toHex(rgb.b);
+      }
+
+      /* Exact sRGB interpolation matching CSS color-mix(in srgb, colorA pctA%, colorB) */
+      function colorMixSrgb(hexA, pctA, hexB) {
+        const a = hexToRgb(hexA);
+        const b = hexToRgb(hexB);
+        const w = pctA / 100;
+        return rgbToHex({
+          r: a.r * w + b.r * (1 - w),
+          g: a.g * w + b.g * (1 - w),
+          b: a.b * w + b.b * (1 - w)
+        });
+      }
+
+      function relativeLuminance(hex) {
+        const { r, g, b } = hexToRgb(hex);
+        const linearize = (c) => {
+          const s = c / 255;
+          return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        };
+        return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+      }
+
+      function contrastRatio(hex1, hex2) {
+        const l1 = relativeLuminance(hex1);
+        const l2 = relativeLuminance(hex2);
+        const lighter = Math.max(l1, l2);
+        const darker = Math.min(l1, l2);
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+
+      function wcagGrade(ratio) {
+        if (ratio >= 7.0) return { label: "AAA", cls: "badge-aaa" };
+        if (ratio >= 4.5) return { label: "AA", cls: "badge-aa" };
+        if (ratio >= 3.0) return { label: "AA Large", cls: "badge-large" };
+        return { label: "Below AA", cls: "badge-large" };
+      }
+
+      function computeSurfaces(mode) {
+        const s = THEME_SEEDS[mode];
+        if (mode === "light") {
+          return {
+            background: s.background,
+            foreground: s.foreground,
+            primary: s.primary,
+            primaryForeground: s.primaryForeground,
+            codeForeground: s.codeForeground,
+            shell: colorMixSrgb("#0a0a0c", 2, s.background),
+            sidebar: colorMixSrgb("#0a0a0c", 4.8, s.background),
+            card: colorMixSrgb(s.background, 30, "#ffffff"),
+            muted: colorMixSrgb("#000000", 4, s.background),
+            mutedForeground: colorMixSrgb(s.foreground, 64, s.background)
+          };
+        }
+        return {
+          background: s.background,
+          foreground: s.foreground,
+          primary: s.primary,
+          primaryForeground: s.primaryForeground,
+          codeForeground: s.codeForeground,
+          shell: colorMixSrgb("#ffffff", 4, s.background),
+          sidebar: colorMixSrgb("#ffffff", 4.6, s.background),
+          card: colorMixSrgb("#ffffff", 5.6, s.background),
+          muted: colorMixSrgb("#ffffff", 4, s.background),
+          mutedForeground: colorMixSrgb(s.foreground, 58, s.background)
+        };
+      }
+
+      function copyText(text, btn) {
+        const markCopied = () => {
+          const prev = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.classList.add("is-copied");
+          setTimeout(() => {
+            btn.textContent = prev;
+            btn.classList.remove("is-copied");
+          }, 1200);
+        };
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          navigator.clipboard.writeText(text).then(markCopied).catch(() => fallbackCopy(text, markCopied));
+        } else {
+          fallbackCopy(text, markCopied);
+        }
+      }
+
+      function fallbackCopy(text, onSuccess) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          onSuccess();
+        } finally {
+          document.body.removeChild(ta);
+        }
+      }
+
+      function createSeedRow(label, hex) {
+        const row = document.createElement("div");
+        row.className = "seed-row";
+
+        const info = document.createElement("div");
+        info.className = "seed-info";
+
+        const swatch = document.createElement("span");
+        swatch.className = "seed-swatch";
+        swatch.style.backgroundColor = hex;
+
+        const textWrap = document.createElement("div");
+        const lbl = document.createElement("span");
+        lbl.className = "seed-label";
+        lbl.textContent = label;
+
+        const code = document.createElement("span");
+        code.className = "seed-hex";
+        code.textContent = hex;
+
+        textWrap.appendChild(lbl);
+        textWrap.appendChild(code);
+        info.appendChild(swatch);
+        info.appendChild(textWrap);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-btn";
+        btn.textContent = "Copy Hex";
+        btn.setAttribute("aria-label", "Copy " + label + " hex " + hex);
+        btn.addEventListener("click", () => copyText(hex, btn));
+
+        row.appendChild(info);
+        row.appendChild(btn);
+        return row;
+      }
+
+      function render() {
+        const seeds = THEME_SEEDS[currentMode];
+        const surfaces = computeSurfaces(currentMode);
+        const palette = currentSyntax === "bohemian"
+          ? BOHEMIAN_SYNTAX[currentMode]
+          : GA_GRUVBOX_SYNTAX[currentMode];
+
+        agWindow.setAttribute("data-mode", currentMode);
+        btnModeLight.setAttribute("aria-pressed", String(currentMode === "light"));
+        btnModeDark.setAttribute("aria-pressed", String(currentMode === "dark"));
+        btnSyntaxBohemian.setAttribute("aria-pressed", String(currentSyntax === "bohemian"));
+        btnSyntaxGa.setAttribute("aria-pressed", String(currentSyntax === "ga"));
+
+        for (const token of TOKEN_ORDER) {
+          agWindow.style.setProperty("--syntax-" + token, palette[token]);
+        }
+
+        const syntaxLabel = currentSyntax === "bohemian" ? "Full Plugin" : "GA Gruvbox Preset";
+        chipActiveMode.textContent = seeds.label + " · " + syntaxLabel;
+        syntaxModeNote.textContent = currentSyntax === "bohemian"
+          ? "Showing 18-token Bohemian Art Nouveau syntax"
+          : "Showing GA Today (Gruvbox Material preset) syntax";
+        codeHeaderBadge.textContent = currentSyntax === "bohemian"
+          ? "BOHEMIAN_SYNTAX (" + currentMode + ")"
+          : "GA_GRUVBOX_SYNTAX (" + currentMode + ")";
+
+        /* Render Quick-Copy Seeds */
+        uiSeedList.innerHTML = "";
+        uiSeedList.appendChild(createSeedRow("Background", seeds.background));
+        uiSeedList.appendChild(createSeedRow("Foreground", seeds.foreground));
+        uiSeedList.appendChild(createSeedRow("Accent", seeds.primary));
+
+        overrideSeedList.innerHTML = "";
+        overrideSeedList.appendChild(createSeedRow("primaryForegroundOverride", seeds.primaryForeground));
+        overrideSeedList.appendChild(createSeedRow("codeForegroundOverride", seeds.codeForeground));
+
+        /* Render Live WCAG Contrast Matrix */
+        wcagModeLabel.textContent = seeds.label + " (" + (currentMode === "light" ? "Light" : "Dark") + ")";
+        const pairs = [
+          { name: "--foreground / --background", fg: surfaces.foreground, bg: surfaces.background },
+          { name: "--foreground / --card", fg: surfaces.foreground, bg: surfaces.card },
+          { name: "--foreground / --sidebar", fg: surfaces.foreground, bg: surfaces.sidebar },
+          { name: "--muted-foreground / --background", fg: surfaces.mutedForeground, bg: surfaces.background },
+          { name: "--primary-foreground / --primary", fg: surfaces.primaryForeground, bg: surfaces.primary },
+          { name: "--code-foreground / --card", fg: surfaces.codeForeground, bg: surfaces.card }
+        ];
+
+        wcagTbody.innerHTML = "";
+        for (const p of pairs) {
+          const ratio = contrastRatio(p.fg, p.bg);
+          const grade = wcagGrade(ratio);
+          const tr = document.createElement("tr");
+
+          const tdName = document.createElement("td");
+          tdName.textContent = p.name;
+
+          const tdSample = document.createElement("td");
+          const wrap = document.createElement("span");
+          wrap.className = "pair-preview";
+          const chip = document.createElement("span");
+          chip.className = "pair-chip";
+          chip.style.color = p.fg;
+          chip.style.backgroundColor = p.bg;
+          chip.textContent = "Aa";
+          wrap.appendChild(chip);
+          tdSample.appendChild(wrap);
+
+          const tdRatio = document.createElement("td");
+          tdRatio.className = "ratio-num";
+          tdRatio.textContent = ratio.toFixed(2) + ":1";
+
+          const tdGrade = document.createElement("td");
+          const badge = document.createElement("span");
+          badge.className = "wcag-badge " + grade.cls;
+          badge.textContent = grade.label;
+          tdGrade.appendChild(badge);
+
+          tr.appendChild(tdName);
+          tr.appendChild(tdSample);
+          tr.appendChild(tdRatio);
+          tr.appendChild(tdGrade);
+          wcagTbody.appendChild(tr);
+        }
+
+        /* Render 18-Token Swatch Inspector */
+        inspectorModeLabel.textContent = (currentSyntax === "bohemian" ? "BOHEMIAN_SYNTAX" : "GA_GRUVBOX_SYNTAX")
+          + " · Contrast vs --card (" + surfaces.card + ")";
+        tokenGrid.innerHTML = "";
+        for (const token of TOKEN_ORDER) {
+          const hex = palette[token];
+          const ratio = contrastRatio(hex, surfaces.card);
+          const card = document.createElement("div");
+          card.className = "token-card";
+          card.style.backgroundColor = surfaces.card;
+          card.style.color = surfaces.foreground;
+
+          const dot = document.createElement("span");
+          dot.className = "token-dot";
+          dot.style.backgroundColor = hex;
+
+          const meta = document.createElement("div");
+          meta.className = "token-meta";
+
+          const name = document.createElement("span");
+          name.className = "token-name";
+          name.style.color = hex;
+          name.textContent = token;
+
+          const detail = document.createElement("span");
+          detail.className = "token-detail";
+          detail.style.color = surfaces.mutedForeground;
+          detail.textContent = hex + " · " + ratio.toFixed(2) + ":1";
+
+          meta.appendChild(name);
+          meta.appendChild(detail);
+          card.appendChild(dot);
+          card.appendChild(meta);
+          tokenGrid.appendChild(card);
+        }
+      }
+
+      btnModeLight.addEventListener("click", () => {
+        currentMode = "light";
+        render();
+      });
+      btnModeDark.addEventListener("click", () => {
+        currentMode = "dark";
+        render();
+      });
+      btnSyntaxBohemian.addEventListener("click", () => {
+        currentSyntax = "bohemian";
+        render();
+      });
+      btnSyntaxGa.addEventListener("click", () => {
+        currentSyntax = "ga";
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

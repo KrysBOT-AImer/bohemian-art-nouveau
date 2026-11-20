@@ -1,0 +1,32 @@
+{
+  "id": "bohemian-art-nouveau-light",
+  "label": "Bohemian Art Nouveau Light",
+  "mode": "light",
+  "seeds": {
+    "background": "#F3EFE8",
+    "foreground": "#162B37",
+    "primary": "#1A3644",
+    "primary_foreground": "#F3EFE8",
+    "code_foreground": "#6C4F3D"
+  },
+  "syntax": {
+    "comment": "#7B8C7E",
+    "punctuation": "#6C4F3D",
+    "property": "#9E6B47",
+    "deleted": "#B85D43",
+    "inserted": "#7B8C7E",
+    "tag": "#4E3242",
+    "constant": "#B85D43",
+    "number": "#B85D43",
+    "string": "#6C4F3D",
+    "attrName": "#9E6B47",
+    "builtin": "#946F2D",
+    "operator": "#2A2C30",
+    "variable": "#162B37",
+    "attrValue": "#7A4D33",
+    "keyword": "#5A3D4D",
+    "function": "#1A3644",
+    "className": "#946F2D",
+    "regex": "#7A4D33"
+  }
+}

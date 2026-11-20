@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nymburk 1902 — Modernizovaná secesní paleta interiéru</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6 sm:p-10 font-sans">
+  <div class="max-w-5xl mx-auto space-y-8">
+    
+    <!-- Záhlaví -->
+    <header class="border-b border-[var(--border)] pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-block px-2.5 py-0.5 rounded text-xs font-medium tracking-wider uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            Stavba z roku 1902 · Byt v Nymburce
+          </span>
+          <span class="text-xs text-[var(--muted-foreground)]">Česká secese × Současné zakázkové truhlářství</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-[var(--foreground)]">
+          Modernizovaná secesní paleta interiéru
+        </h1>
+        <p class="text-sm sm:text-base text-[var(--muted-foreground)] mt-1.5 max-w-2xl">
+          Vyvážený koncept hluboce matné labské modři, teplého kouřeného dubu a patinované mosazi navržený pro vysoké stropy, původní štuky a nábytek na míru.
+        </p>
+      </div>
+      
+      <!-- Simulace osvětlení -->
+      <div class="bg-[var(--card)] border border-[var(--border)] p-2 rounded-xl flex items-center gap-2 shadow-sm">
+        <span class="text-xs font-medium text-[var(--muted-foreground)] pl-2">Osvětlení:</span>
+        <button id="btn-day" onclick="setAmbience('day')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs">
+          4000K Denní světlo
+        </button>
+        <button id="btn-evening" onclick="setAmbience('evening')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          2700K Teplý večer
+        </button>
+      </div>
+    </header>
+
+    <!-- Hlavní architektonická paleta -->
+    <section>
+      <div class="flex justify-between items-baseline mb-4">
+        <h2 class="text-lg font-semibold tracking-tight text-[var(--foreground)]">Architektonické vyvážení barev (poměr 60-25-10-5)</h2>
+        <span class="text-xs text-[var(--muted-foreground)]">Kliknutím na kartu nebo tlačítko zkopírujete HEX kód</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="palette-grid">
+        
+        <!-- Barva 1: Základ -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xs hover:border-amber-500/50 transition-all cursor-pointer group flex flex-col justify-between" onclick="copyHex('#F3EFE8', 'Česká křída')">
+          <div>
+            <div class="h-32 w-full transition-transform duration-300 group-hover:scale-105" style="background-color: #F3EFE8;" id="swatch-chalk"></div>
+            <div class="p-4 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">60% Základ</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)]">Stěny a stropy</span>
+              </div>
+              <h3 class="font-semibold text-base text-[var(--foreground)]">Česká křída / Alabastr</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Měkký vápenný tón, který zjemňuje stíny pod 3,4m stropy a nechává vyniknout štuky.</p>
+              <div class="pt-2 text-xs font-mono text-[var(--foreground)] flex flex-col gap-0.5 border-t border-[var(--border)]/60">
+                <div class="flex justify-between"><span>HEX:</span><span class="font-bold text-amber-600 dark:text-amber-400">#F3EFE8</span></div>
+                <div class="flex justify-between"><span>RAL:</span><span class="text-[var(--muted-foreground)]">9010 / 9001</span></div>
+                <div class="flex justify-between"><span>NCS:</span><span class="text-[var(--muted-foreground)]">S 0603-Y20R</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-amber-500 hover:text-black text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="event.stopPropagation(); copyHex('#F3EFE8', 'Česká křída')">
+              <span>📋</span> Zkopírovat #F3EFE8
+            </button>
+          </div>
+        </div>
+
+        <!-- Barva 2: Půlnoční modř -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xs hover:border-amber-500/50 transition-all cursor-pointer group flex flex-col justify-between" onclick="copyHex('#1A3644', 'Labská půlnoční modř')">
+          <div>
+            <div class="h-32 w-full transition-transform duration-300 group-hover:scale-105" style="background-color: #1A3644;" id="swatch-blue"></div>
+            <div class="p-4 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">25% Akcent</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)]">Vestavby a dveře</span>
+              </div>
+              <h3 class="font-semibold text-base text-[var(--foreground)]">Labská půlnoční modř</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Sametová šedomodrá inspirovaná nočními litografiemi Alfonse Muchy a vitrážemi.</p>
+              <div class="pt-2 text-xs font-mono text-[var(--foreground)] flex flex-col gap-0.5 border-t border-[var(--border)]/60">
+                <div class="flex justify-between"><span>HEX:</span><span class="font-bold text-sky-600 dark:text-sky-400">#1A3644</span></div>
+                <div class="flex justify-between"><span>RAL:</span><span class="text-[var(--muted-foreground)]">5008 (Šedomodrá)</span></div>
+                <div class="flex justify-between"><span>NCS:</span><span class="text-[var(--muted-foreground)]">S 7015-B10G</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-sky-500 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="event.stopPropagation(); copyHex('#1A3644', 'Labská půlnoční modř')">
+              <span>📋</span> Zkopírovat #1A3644
+            </button>
+          </div>
+        </div>
+
+        <!-- Barva 3: Dřevo -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xs hover:border-amber-500/50 transition-all cursor-pointer group flex flex-col justify-between" onclick="copyHex('#6C4F3D', 'Kouřený dub')">
+          <div>
+            <div class="h-32 w-full transition-transform duration-300 group-hover:scale-105" style="background-color: #6C4F3D;" id="swatch-wood"></div>
+            <div class="p-4 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500">Základ dřeva</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)]">Podlahy a dýha</span>
+              </div>
+              <h3 class="font-semibold text-base text-[var(--foreground)]">Kouřený evropský dub</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Teplý medovo-tabákový tón s matným tvrdovoskovým olejem, ukotvuje prostor.</p>
+              <div class="pt-2 text-xs font-mono text-[var(--foreground)] flex flex-col gap-0.5 border-t border-[var(--border)]/60">
+                <div class="flex justify-between"><span>HEX:</span><span class="font-bold text-amber-700 dark:text-amber-500">#6C4F3D</span></div>
+                <div class="flex justify-between"><span>Úprava:</span><span class="text-[var(--muted-foreground)]">Tvrdovoskový olej</span></div>
+                <div class="flex justify-between"><span>Vzor:</span><span class="text-[var(--muted-foreground)]">Stromeček / Lamely</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-amber-700 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="event.stopPropagation(); copyHex('#6C4F3D', 'Kouřený dub')">
+              <span>📋</span> Zkopírovat #6C4F3D
+            </button>
+          </div>
+        </div>
+
+        <!-- Barva 4: Mosaz -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xs hover:border-amber-500/50 transition-all cursor-pointer group flex flex-col justify-between" onclick="copyHex('#C29B53', 'Patinovaná mosaz')">
+          <div>
+            <div class="h-32 w-full transition-transform duration-300 group-hover:scale-105" style="background-color: #C29B53;" id="swatch-brass"></div>
+            <div class="p-4 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">10% Kov</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)]">Kování a světla</span>
+              </div>
+              <h3 class="font-semibold text-base text-[var(--foreground)]">Patinovaná mosaz</h3>
+              <p class="text-xs text-[var(--muted-foreground)]">Kartáčovaná nebo surová mosaz s přirozenou patinou. Žádný lesklý žlutý chrom.</p>
+              <div class="pt-2 text-xs font-mono text-[var(--foreground)] flex flex-col gap-0.5 border-t border-[var(--border)]/60">
+                <div class="flex justify-between"><span>HEX:</span><span class="font-bold text-yellow-600 dark:text-yellow-400">#C29B53</span></div>
+                <div class="flex justify-between"><span>Materiál:</span><span class="text-[var(--muted-foreground)]">Masivní mosaz</span></div>
+                <div class="flex justify-between"><span>Povrch:</span><span class="text-[var(--muted-foreground)]">Kartáčovaný satén</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-yellow-500 hover:text-black text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="event.stopPropagation(); copyHex('#C29B53', 'Patinovaná mosaz')">
+              <span>📋</span> Zkopírovat #C29B53
+            </button>
+          </div>
+        </div>
+
+        <!-- Barva 5: Teplý doplněk (Interaktivní výběr bez zelené) -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-xs transition-all flex flex-col justify-between">
+          <div>
+            <div class="h-28 w-full transition-colors duration-300 cursor-pointer" style="background-color: #C78A3A;" id="swatch-complement" onclick="copyCurrentComplement()"></div>
+            <div class="p-3.5 space-y-2">
+              <!-- Přepínače doplňkových barev -->
+              <div class="flex flex-wrap gap-1">
+                <button onclick="selectComplement('ochre')" id="btn-comp-ochre" class="text-xs px-2 py-0.5 rounded font-medium bg-amber-500 text-black shadow-xs">Okr</button>
+                <button onclick="selectComplement('terracotta')" id="btn-comp-terracotta" class="text-xs px-2 py-0.5 rounded font-medium bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Terakota</button>
+                <button onclick="selectComplement('cognac')" id="btn-comp-cognac" class="text-xs px-2 py-0.5 rounded font-medium bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Koňak</button>
+                <button onclick="selectComplement('plum')" id="btn-comp-plum" class="text-xs px-2 py-0.5 rounded font-medium bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Švestka</button>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400" id="comp-category">5% Teplý akcent</span>
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-[var(--muted)] text-[var(--muted-foreground)]" id="comp-usage">Textil a sklo</span>
+                </div>
+                <h3 class="font-semibold text-base text-[var(--foreground)] mt-0.5" id="comp-title">Český pálený okr</h3>
+                <p class="text-xs text-[var(--muted-foreground)]" id="comp-desc">Zlato-jantarové teplo fasád české secese a Muchových zářících sluncí.</p>
+              </div>
+
+              <div class="pt-1.5 text-xs font-mono text-[var(--foreground)] flex flex-col gap-0.5 border-t border-[var(--border)]/60 cursor-pointer" onclick="copyCurrentComplement()">
+                <div class="flex justify-between"><span>HEX:</span><span class="font-bold text-amber-600 dark:text-amber-400" id="comp-hex">#C78A3A</span></div>
+                <div class="flex justify-between"><span>RAL:</span><span class="text-[var(--muted-foreground)]" id="comp-ral">1005 (Medově žlutá)</span></div>
+                <div class="flex justify-between"><span>NCS:</span><span class="text-[var(--muted-foreground)]" id="comp-ncs">S 2060-Y10R</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="px-3.5 pb-3.5">
+            <button id="btn-copy-comp" class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-amber-500 hover:text-black text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="copyCurrentComplement()">
+              <span>📋</span> Zkopírovat #C78A3A
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300"></div>
+    </section>
+
+    <!-- Náhled materiálové synergie a truhlářské detail -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div>
+        <h2 class="text-lg font-semibold tracking-tight text-[var(--foreground)]">Náhled materiálové synergie pro stolaře</h2>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1">
+          Jak spolu ladí hluboce matná modř, patinovaná mosaz a kouřený dub pod vysokými stropy s velkými okny:
+        </p>
+      </div>
+
+      <!-- Vizuální simulátor nábytku -->
+      <div class="rounded-xl border border-[var(--border)] p-6 bg-[var(--background)] flex flex-col md:flex-row gap-8 items-center" id="mockup-container">
+        
+        <!-- Levá část: Maketa komody / knihovny -->
+        <div class="w-full md:w-1/2 flex justify-center">
+          <div class="w-72 h-80 rounded-2xl shadow-lg border border-[var(--border)] relative overflow-hidden flex flex-col" style="background-color: #1A3644;">
+            <!-- Horní deska z dubu -->
+            <div class="h-6 w-full border-b border-black/20" style="background-color: #6C4F3D;"></div>
+            
+            <!-- Dvířka s mosaznou stínovou spárou a úchytkou -->
+            <div class="flex-1 p-4 flex gap-3 relative">
+              <!-- Levé dvířko s lamelami -->
+              <div class="flex-1 rounded-lg border border-white/5 relative flex items-center justify-end pr-2" style="background: repeating-linear-gradient(90deg, #17303D, #17303D 8px, #1A3644 8px, #1A3644 16px);">
+                <!-- Mosazné štíhlé madlo -->
+                <div class="w-1.5 h-20 rounded-full shadow-sm" style="background: linear-gradient(180deg, #DFBE7A, #B38B40, #946F2D);"></div>
+              </div>
+
+              <!-- Pravé dvířko s obloukem a drážkovaným sklem -->
+              <div class="flex-1 rounded-lg border border-white/5 relative flex flex-col items-center justify-center p-2" style="background-color: #162E3B;">
+                <div class="w-full h-44 rounded-t-full border border-amber-500/30 flex items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);">
+                  <div class="w-1.5 h-20 rounded-full shadow-sm absolute left-1" style="background: linear-gradient(180deg, #DFBE7A, #B38B40, #946F2D);"></div>
+                  <span class="text-[11px] font-mono text-amber-200/60 uppercase tracking-widest rotate-90">Drážkované sklo</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sokl s mosaznou patkou -->
+            <div class="h-4 w-full flex justify-between px-4" style="background-color: #12242E;">
+              <div class="w-8 h-2 rounded-t-sm" style="background-color: #C29B53;"></div>
+              <div class="w-8 h-2 rounded-t-sm" style="background-color: #C29B53;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pravá část: Zásady pro truhláře -->
+        <div class="w-full md:w-1/2 space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-medium text-amber-600 dark:text-amber-400">
+            <span>Zadání pro truhláře / architekta</span>
+          </div>
+          <h3 class="text-xl font-serif font-bold text-[var(--foreground)]">Současná secese: Žádná historizující kopie</h3>
+          <ul class="space-y-2.5 text-xs sm:text-sm text-[var(--muted-foreground)]">
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-500 mt-1">✦</span>
+              <span><strong>Měkké poloměry (R15–R25 mm):</strong> Místo řezbovaných květů pracujte s jemně zaoblenými hranami stolů, skříněk a zaoblenými nikami. Odkazuje to na secesní křivku čistým způsobem.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-500 mt-1">✦</span>
+              <span><strong>Vertikální drážkování a žebrované sklo:</strong> Svislý rytmus byl pro rok 1902 klíčový (Jan Kotěra, vídeňská moderna). Použijte jemné lamelování dvířek nebo drážkované / ornamentální sklo v rámu.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-500 mt-1">✦</span>
+              <span><strong>Mosazná stínová spára (3–5 mm):</strong> Zapuštěný mosazný profil oddělující dřevěnou desku od modrých čel zásuvek vytváří luxusní plovoucí konturu.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-amber-500 mt-1">✦</span>
+              <span><strong>Hluboký mat (stupeň lesku 3–5 %):</strong> Modrý lak na nábytku musí být absolutně matný (soft-touch proti otiskům), aby působil jako historický minerální pigment a neodrážel odlesky.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prostorové členění: Spací pódium vs. Pracovna -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs px-2.5 py-0.5 rounded uppercase font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">Prostorové řešení</span>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-[var(--foreground)]">Dělící příčka: Spací pódium vs. Pracovní kout</h2>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)]">Tři architektonické přístupy respektující výšku stropu a původní štuky</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Varianta 1 -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)]">
+          <div class="h-3 rounded-full w-14" style="background-color: #1A3644;"></div>
+          <h3 class="font-bold text-sm text-[var(--foreground)]">1. Útulná matná modř (Doporučeno)</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            <strong>Odstín:</strong> RAL 5008 / NCS S 7015-B10G (Hluboký mat).<br>
+            <strong>Psychologie:</strong> Na straně lůžka pohlcuje světlo a vytváří uklidňující noční spací kout. Na straně stolu podporuje soustředění a dává vyniknout mosazné stolní lampě.
+          </p>
+          <div class="text-xs font-mono text-amber-600 dark:text-amber-400 bg-amber-500/5 p-2 rounded border border-amber-500/10">
+            ✦ Důležité: Ukončit ve výšce 2,10–2,30 m, aby štukový strop plynule procházel celou místností a prostor dýchal.
+          </div>
+        </div>
+
+        <!-- Varianta 2 -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)]">
+          <div class="h-3 rounded-full w-14" style="background-color: #6C4F3D;"></div>
+          <h3 class="font-bold text-sm text-[var(--foreground)]">2. Lamelová stěna z kouřeného dubu + žebrované sklo</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            <strong>Materiál:</strong> Svislé dubové lamely se vsazeným drážkovaným sklem v mosazném rámu.<br>
+            <strong>Kdy použít:</strong> Pokud jedna ze zón nemá přímé okno. Secesní paravány tradičně filtrovaly denní světlo bez pocitu stísněnosti.
+          </p>
+          <div class="text-xs font-mono text-amber-600 dark:text-amber-400 bg-amber-500/5 p-2 rounded border border-amber-500/10">
+            ✦ Vzor vídeňské secese; propouští rozptýlené měkké denní světlo.
+          </div>
+        </div>
+
+        <!-- Varianta 3 -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)]">
+          <div class="h-3 rounded-full w-14" style="background-color: #C78A3A;"></div>
+          <h3 class="font-bold text-sm text-[var(--foreground)]">3. Dvoustranný nábytkový blok</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            <strong>Provedení:</strong> Ze strany stolu vestavěný blok s kabelovým vedením a dubovými policemi; ze strany lůžka měkké čalouněné čelo s mosaznou čtecí lampičkou.
+          </p>
+          <div class="text-xs font-mono text-amber-600 dark:text-amber-400 bg-amber-500/5 p-2 rounded border border-amber-500/10">
+            ✦ Vnější vertikální hranu zaoblete velkým poloměrem (R20–R30 mm).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pokoj pro dceru -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs px-2.5 py-0.5 rounded uppercase font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">Pokoj pro dceru</span>
+          <span class="text-xs text-[var(--muted-foreground)]">Přírodní secesní pastely · Nadčasové řešení, které s dítětem poroste</span>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-[var(--foreground)]">Dívčí palety v duchu roku 1902 (bez křiklavého plastového vzhledu)</h2>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)]">
+          V secesi vycházely ženské tóny z přírody: šípkové růže, meruňkový nektar, vistárie a lipové listí. Ve spojení s kouřeným dubem a mosazí působí pohádkově v dětství a vkusně v dospívání.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Paleta 1: Muchova růže -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex gap-2 h-16 rounded-lg overflow-hidden border border-[var(--border)]">
+              <div class="w-1/2 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #D6A692;" onclick="copyHex('#D6A692', 'Zastřená růže')">
+                <span class="text-[10px] font-mono text-white/90 bg-black/30 px-1 rounded">#D6A692</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #6C4F3D;" onclick="copyHex('#6C4F3D', 'Dub')">
+                <span class="text-[10px] font-mono text-white/90 bg-black/30 px-1 rounded">#6C4F3D</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #C29B53;" onclick="copyHex('#C29B53', 'Mosaz')">
+                <span class="text-[10px] font-mono text-black/90 bg-white/40 px-1 rounded">#C29B53</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-[var(--foreground)]">1. Muchova růže a teplý jantar</h3>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 font-medium">Hlavní volba</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              <strong>Zastřená růže</strong> (<span class="font-mono text-rose-500">#D6A692</span>), <strong>Kouřený dub</strong> (<span class="font-mono">#6C4F3D</span>), <strong>Patinovaná mosaz</strong> (<span class="font-mono text-yellow-600">#C29B53</span>).
+            </p>
+            <div class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2">
+              Jemný hliněno-okvětní tón křídové růže. Přirozeně navazuje na zbytek bytu a teplou mosaz.
+            </div>
+          </div>
+          <div class="pt-2 flex flex-col gap-1.5">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-rose-500 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="copyHex('#D6A692', 'Zastřená vídeňská růže')">
+              <span>📋</span> Zkopírovat růži #D6A692
+            </button>
+          </div>
+        </div>
+
+        <!-- Paleta 2: Meruňkový pudr a šalvěj -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex gap-2 h-16 rounded-lg overflow-hidden border border-[var(--border)]">
+              <div class="w-1/2 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #E8BA9B;" onclick="copyHex('#E8BA9B', 'Meruňkový pudr')">
+                <span class="text-[10px] font-mono text-black/80 bg-white/40 px-1 rounded">#E8BA9B</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #7B8C7E;" onclick="copyHex('#7B8C7E', 'Lipová šalvěj')">
+                <span class="text-[10px] font-mono text-white/90 bg-black/30 px-1 rounded">#7B8C7E</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #C29B53;" onclick="copyHex('#C29B53', 'Mosaz')">
+                <span class="text-[10px] font-mono text-black/90 bg-white/40 px-1 rounded">#C29B53</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-[var(--foreground)]">2. Meruňkový pudr a lipová zeleň</h3>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Botanická</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              <strong>Meruňkový pudr</strong> (<span class="font-mono text-amber-600">#E8BA9B</span>), <strong>Lipová šalvěj</strong> (<span class="font-mono text-emerald-600">#7B8C7E</span>), <strong>Mosaz</strong> (<span class="font-mono text-yellow-600">#C29B53</span>).
+            </p>
+            <div class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2">
+              Svěží, radostná kombinace jako ze secesní botanické zahrady. Působí prosvětleně i v zimě.
+            </div>
+          </div>
+          <div class="pt-2 flex flex-col gap-1.5">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-orange-400 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="copyHex('#E8BA9B', 'Meruňkový pudr')">
+              <span>📋</span> Zkopírovat meruňku #E8BA9B
+            </button>
+          </div>
+        </div>
+
+        <!-- Paleta 3: Vistárie a půlnoční obloha -->
+        <div class="rounded-xl border border-[var(--border)] p-5 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex gap-2 h-16 rounded-lg overflow-hidden border border-[var(--border)]">
+              <div class="w-1/2 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #A89FAD;" onclick="copyHex('#A89FAD', 'Kouřová vistárie')">
+                <span class="text-[10px] font-mono text-white/90 bg-black/30 px-1 rounded">#A89FAD</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #1A3644;" onclick="copyHex('#1A3644', 'Půlnoční modř')">
+                <span class="text-[10px] font-mono text-white/90 bg-black/30 px-1 rounded">#1A3644</span>
+              </div>
+              <div class="w-1/4 h-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-1" style="background-color: #C29B53;" onclick="copyHex('#C29B53', 'Mosaz')">
+                <span class="text-[10px] font-mono text-black/90 bg-white/40 px-1 rounded">#C29B53</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-[var(--foreground)]">3. Kouřová vistárie a noční obloha</h3>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium">Snová</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              <strong>Kouřová lila</strong> (<span class="font-mono text-purple-400">#A89FAD</span>), <strong>Půlnoční modř</strong> (<span class="font-mono text-sky-500">#1A3644</span>), <strong>Mosaz</strong> (<span class="font-mono text-yellow-600">#C29B53</span>).
+            </p>
+            <div class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2">
+              Inspirováno Muchovými nočními motivy ("Jitřenka"). Umělecká, klidná atmosféra navazující na modř bytu.
+            </div>
+          </div>
+          <div class="pt-2 flex flex-col gap-1.5">
+            <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-purple-500 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1.5" onclick="copyHex('#A89FAD', 'Kouřová vistárie')">
+              <span>📋</span> Zkopírovat vistárii #A89FAD
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Řešení desek pracovních stolů -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs px-2.5 py-0.5 rounded uppercase font-semibold bg-stone-500/10 text-stone-600 dark:text-stone-400 border border-stone-500/20">Pracovní desky na míru</span>
+          <span class="text-xs text-[var(--muted-foreground)]">Řešení bez křiklavého kontrastu · Mezi bílou a černou</span>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-[var(--foreground)]">Materiál a barva desek stolů (propojení s tmavou knihovnou)</h2>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)]">
+          Čistě bílý alabastr působí v tmavohnědém korpusu knihoven jako pěst na oko (příliš ostrý kontrast 10:1). Zde jsou 4 kultivovaná řešení ze spektra černé a světlé, která sednou do dispozice:
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Varianta 1: Uhelné linoleum -->
+        <div class="rounded-xl border border-[var(--border)] p-4 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-2.5">
+            <div class="h-20 rounded-lg w-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-2" style="background-color: #2A2C30;" onclick="copyHex('#2A2C30', 'Uhelné linoleum')">
+              <span class="text-xs font-mono text-white/90 bg-black/40 px-1.5 py-0.5 rounded">#2A2C30</span>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-[var(--foreground)]">1. Uhelné linoleum</h3>
+                <span class="text-[11px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">Favorit</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">
+                <strong>Forbo Desktop (Charcoal / Nero)</strong> nebo matný <strong>Fenix NTM</strong>.
+              </p>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2 leading-relaxed">
+              Tradiční secesní psací stoly měly zapuštěné linoleum. Sametově matné, teplé na dotek, netvoří odlesky pod monitory a plynule navazuje na tmavé police.
+            </p>
+          </div>
+          <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-stone-700 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1" onclick="copyHex('#2A2C30', 'Uhelné linoleum')">
+            <span>📋</span> Zkopírovat #2A2C30
+          </button>
+        </div>
+
+        <!-- Varianta 2: Kašmírový greige -->
+        <div class="rounded-xl border border-[var(--border)] p-4 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-2.5">
+            <div class="h-20 rounded-lg w-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-2" style="background-color: #C8BEAF;" onclick="copyHex('#C8BEAF', 'Kašmírový vápenec')">
+              <span class="text-xs font-mono text-black/90 bg-white/50 px-1.5 py-0.5 rounded">#C8BEAF</span>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-[var(--foreground)]">2. Kašmírový greige</h3>
+                <span class="text-[11px] px-1.5 py-0.5 rounded bg-stone-500/10 text-stone-600 dark:text-stone-400 font-medium">Světlé</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">
+                <strong>Odstín: Egger U702 Kašmír</strong> / NCS S 2005-Y50R (Jura Limestone).
+              </p>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2 leading-relaxed">
+              Splňuje přání ženy po světlé desce, ale bez křiklavosti. Šedobéžový podtón sráží kontrast vůči hnědé na příjemný poměr 3:1.
+            </p>
+          </div>
+          <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-stone-400 hover:text-black text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1" onclick="copyHex('#C8BEAF', 'Kašmírový vápenec')">
+            <span>📋</span> Zkopírovat #C8BEAF
+          </button>
+        </div>
+
+        <!-- Varianta 3: Světlé secesní teraco -->
+        <div class="rounded-xl border border-[var(--border)] p-4 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-2.5">
+            <div class="h-20 rounded-lg w-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-2 relative overflow-hidden" style="background-color: #E0D9CE;" onclick="copyHex('#E0D9CE', 'Secesní teraco')">
+              <span class="text-xs font-mono text-black/90 bg-white/60 px-1.5 py-0.5 rounded relative z-10">#E0D9CE</span>
+              <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#2A2C30 1px, transparent 1px), radial-gradient(#6C4F3D 1px, transparent 1px); background-size: 8px 8px; background-position: 0 0, 4px 4px;"></div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-[var(--foreground)]">3. Secesní teraco</h3>
+                <span class="text-[11px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Textura</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">
+                <strong>Technistone / Terrazzo</strong> se zrny tmavého kamene a křemene.
+              </p>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2 leading-relaxed">
+              Autentický secesní kámen. Tmavá zrnka v ploše vizuálně navazují na tmavou knihovnu, takže deska nepůsobí jako cizorodý prvek.
+            </p>
+          </div>
+          <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-stone-300 hover:text-black text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1" onclick="copyHex('#E0D9CE', 'Secesní teraco')">
+            <span>📋</span> Zkopírovat #E0D9CE
+          </button>
+        </div>
+
+        <!-- Varianta 4: Nero Marquina -->
+        <div class="rounded-xl border border-[var(--border)] p-4 space-y-3 bg-[var(--background)] flex flex-col justify-between">
+          <div class="space-y-2.5">
+            <div class="h-20 rounded-lg w-full cursor-pointer hover:opacity-90 transition-opacity flex items-end p-2" style="background-color: #1F2023;" onclick="copyHex('#1F2023', 'Černý mramor')">
+              <span class="text-xs font-mono text-white/90 bg-black/60 px-1.5 py-0.5 rounded">#1F2023</span>
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-[var(--foreground)]">4. Černý mramor</h3>
+                <span class="text-[11px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:text-slate-400 font-medium">Luxus</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1">
+                <strong>Matný Nero Marquina</strong> s jemnou bílo-zlatou žilkou.
+              </p>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] border-t border-[var(--border)] pt-2 leading-relaxed">
+              Satinovaný matný povrch. Spojuje černou s jemnou bílou kresbou žilkování, která navazuje na světlé stěny a mosaz.
+            </p>
+          </div>
+          <button class="w-full py-1.5 rounded-lg bg-[var(--muted)] hover:bg-zinc-800 hover:text-white text-xs font-mono font-medium transition-colors border border-[var(--border)] flex items-center justify-center gap-1" onclick="copyHex('#1F2023', 'Černý mramor')">
+            <span>📋</span> Zkopírovat #1F2023
+          </button>
+        </div>
+      </div>
+
+      <!-- Důležitá poznámka pro stolaře: Mosazná hrana & stínová spára -->
+      <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <div class="h-8 w-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400 font-bold text-sm">
+            ✦
+          </div>
+          <div class="space-y-0.5">
+            <h4 class="text-xs sm:text-sm font-semibold text-[var(--foreground)]">Truhlářský detail: Masivní mosazná nákližka / stínová spára (2–3 mm)</h4>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Při volbě <strong>uhelného linolea (#2A2C30)</strong> nebo <strong>kašmírového greige (#C8BEAF)</strong> nechte čelní a boční hranu desky lemovat <strong>masivní kartáčovanou mosaznou lištou</strong> (profil 2–3 mm), případně vytvořte mezi deskou a knihovnou jemnou mosaznou stínovou spáru. Tento šperkařský secesní detail opticky sjednotí stoly s úchytkami a svítidly v místnosti.
+            </p>
+          </div>
+        </div>
+        <button onclick="copyHex('#C29B53', 'Mosazná lišta stolu')" class="shrink-0 text-xs font-mono font-medium px-3 py-1.5 rounded-lg bg-[var(--card)] hover:bg-amber-500 hover:text-black border border-amber-500/30 transition-colors flex items-center gap-1.5">
+          <span>📋</span> Mosaz #C29B53
+        </button>
+      </div>
+    </section>
+
+    <!-- Praktické uplatnění v místnostech -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+        <div class="h-2 w-12 rounded-full" style="background-color: #1A3644;"></div>
+        <h4 class="font-semibold text-sm text-[var(--foreground)]">Obývací pokoj a knihovna</h4>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          Vysoká knihovna po strop v <strong>labské modři (#1A3644)</strong> s integrovanými mosaznými obrazovými světly. Parkety do stromečku z kouřeného dubu a lněné závěsy v odstínu křídy.
+        </p>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+        <div class="h-2 w-12 rounded-full" style="background-color: #6C4F3D;"></div>
+        <h4 class="font-semibold text-sm text-[var(--foreground)]">Kuchyně a jídelna</h4>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          Spodní skříňky v matné modři, horní skříňky z kouřeného dubu s drážkovaným sklem. Masivní mosazná dřezová baterie, mosazné úchytky a světlá mramorová či teracová pracovní deska.
+        </p>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3">
+        <div class="h-2 w-12 rounded-full" style="background-color: #C78A3A;"></div>
+        <h4 class="font-semibold text-sm text-[var(--foreground)]">Koupelna a předsíň</h4>
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          Geometrická cementová dlažba, koule z opálového skla na mosazných ramenech, velké zaoblené mosazné zrcadlo a dřevěné obložení do půli stěny v odstínu křídy nebo okru.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const complements = {
+      ochre: {
+        hexDay: "#C78A3A",
+        hexEve: "#D99330",
+        ral: "1005 (Medově žlutá)",
+        ncs: "S 2060-Y10R",
+        title: "Český pálený okr",
+        category: "5% Teplý akcent",
+        usage: "Textil a jantarové sklo",
+        desc: "Zlato-jantarové teplo fasád české secese a Muchových zářících sluncí."
+      },
+      terracotta: {
+        hexDay: "#B85D43",
+        hexEve: "#C66347",
+        ral: "040 40 40 / 3016",
+        ncs: "S 3560-Y80R",
+        title: "Bohémská terakota",
+        category: "5% Zemitý akcent",
+        usage: "Keramika a polštáře",
+        desc: "Pálená hlína inspirovaná secesními kachlovými kamny v měšťanských bytech."
+      },
+      cognac: {
+        hexDay: "#9E6B47",
+        hexEve: "#AD734A",
+        ral: "8001 (Okrově hnědá)",
+        ncs: "S 3030-Y30R",
+        title: "Sedlářská koňaková kůže",
+        category: "5% Klidný neutrál",
+        usage: "Křesla a židle",
+        desc: "Teplá koňakově hnědá, která dodá luxus bez zbytečné barevné křiklavosti."
+      },
+      plum: {
+        hexDay: "#5A3D4D",
+        hexEve: "#4E3242",
+        ral: "4007 (Purpurově fialová)",
+        ncs: "S 6020-R20B",
+        title: "Vídeňská sametová švestka",
+        category: "5% Klenotový akcent",
+        usage: "Čalounění a koberce",
+        desc: "Dramatický švestkový tón z budoárů vídeňské secese a sametových závěsů."
+      }
+    };
+
+    let currentComplement = 'ochre';
+    let currentAmbience = 'day';
+
+    function copyHex(hex, name) {
+      navigator.clipboard.writeText(hex).then(() => {
+        const toast = document.getElementById('toast');
+        toast.innerHTML = `<div class="px-4 py-2.5 rounded-xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 font-mono text-xs font-semibold shadow-2xl border border-white/20 dark:border-slate-800/30 flex items-center gap-2">
+          <span class="text-emerald-400 dark:text-emerald-600 font-bold">✓</span>
+          <span>Zkopírováno: <span class="underline decoration-amber-400 font-bold">${hex}</span> ${name ? '(' + name + ')' : ''} do schránky!</span>
+        </div>`;
+        toast.classList.remove('hidden');
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => toast.classList.add('hidden'), 2500);
+      });
+    }
+
+    function copyCurrentComplement() {
+      const c = complements[currentComplement];
+      copyHex(c.hexDay, c.title);
+    }
+
+    function selectComplement(name) {
+      currentComplement = name;
+      ['ochre', 'terracotta', 'cognac', 'plum'].forEach(id => {
+        const btn = document.getElementById(`btn-comp-${id}`);
+        if (id === name) {
+          btn.className = "text-xs px-2 py-0.5 rounded font-medium bg-amber-500 text-black shadow-xs";
+        } else {
+          btn.className = "text-xs px-2 py-0.5 rounded font-medium bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        }
+      });
+
+      const c = complements[name];
+      const sComp = document.getElementById('swatch-complement');
+      sComp.style.backgroundColor = currentAmbience === 'evening' ? c.hexEve : c.hexDay;
+      document.getElementById('comp-title').textContent = c.title;
+      document.getElementById('comp-desc').textContent = c.desc;
+      document.getElementById('comp-category').textContent = c.category;
+      document.getElementById('comp-usage').textContent = c.usage;
+      document.getElementById('comp-hex').textContent = c.hexDay;
+      document.getElementById('comp-ral').textContent = c.ral;
+      document.getElementById('comp-ncs').textContent = c.ncs;
+      
+      const copyBtn = document.getElementById('btn-copy-comp');
+      if (copyBtn) {
+        copyBtn.innerHTML = `<span>📋</span> Zkopírovat ${c.hexDay}`;
+      }
+    }
+
+    function setAmbience(mode) {
+      currentAmbience = mode;
+      const btnDay = document.getElementById('btn-day');
+      const btnEve = document.getElementById('btn-evening');
+      const sChalk = document.getElementById('swatch-chalk');
+      const sBlue = document.getElementById('swatch-blue');
+      const sWood = document.getElementById('swatch-wood');
+      const sBrass = document.getElementById('swatch-brass');
+      const sComp = document.getElementById('swatch-complement');
+
+      const c = complements[currentComplement];
+
+      if (mode === 'evening') {
+        btnEve.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-amber-500 text-black shadow-xs";
+        btnDay.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        
+        sChalk.style.backgroundColor = "#EFE4D2";
+        sBlue.style.backgroundColor = "#162B37";
+        sWood.style.backgroundColor = "#7A4D33";
+        sBrass.style.backgroundColor = "#D4A853";
+        if (sComp) sComp.style.backgroundColor = c.hexEve;
+      } else {
+        btnDay.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs";
+        btnEve.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-[var(--muted-foreground)] hover:text-[var(--foreground)]";
+        
+        sChalk.style.backgroundColor = "#F3EFE8";
+        sBlue.style.backgroundColor = "#1A3644";
+        sWood.style.backgroundColor = "#6C4F3D";
+        sBrass.style.backgroundColor = "#C29B53";
+        if (sComp) sComp.style.backgroundColor = c.hexDay;
+      }
+    }
+  </script>
+</body>
+</html>

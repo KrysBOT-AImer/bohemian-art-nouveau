@@ -1,6 +1,6 @@
 # Bohemian Art Nouveau (`bohemian-art-nouveau`)
 
-[![Version](https://img.shields.io/badge/version-v1.0.0-1A3644)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.1.0-1A3644)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-7B8C7E)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-6C4F3D)](#seamless-1-command-installation-linux--windows)
 [![Antigravity](https://img.shields.io/badge/Antigravity-2.33.0%2B-D4A853)](#compatibility-note-antigravity-2-v2330)
@@ -24,7 +24,7 @@ Paired **Light (4000K Day)** and **Dark (2700K Evening)** themes for **Antigravi
 
 ## Getting the Theme
 
-1. **Download from GitHub Releases**: Download and extract `bohemian-art-nouveau-v1.0.0.zip` (or `.tar.gz`) from [GitHub Releases](https://github.com/KrysBOT-AImer/bohemian-art-nouveau/releases/latest).
+1. **Download from GitHub Releases**: Download and extract `bohemian-art-nouveau-v1.1.0.zip` (or `.tar.gz`) from [GitHub Releases](https://github.com/KrysBOT-AImer/bohemian-art-nouveau/releases/latest).
 2. **Or Clone the Repository**:
    ```bash
    git clone https://github.com/KrysBOT-AImer/bohemian-art-nouveau.git && cd bohemian-art-nouveau
@@ -73,6 +73,33 @@ py apply_theme.py --apply
 | User Config | `~/.gemini/config/config.json` | `%USERPROFILE%\.gemini\config\config.json` |
 | Plugins Directory | `~/.gemini/config/plugins/bohemian-art-nouveau/` | `%USERPROFILE%\.gemini\config\plugins\bohemian-art-nouveau\` |
 | App Storage | `~/.config/Antigravity/app_storage.json` (or `$XDG_CONFIG_HOME/Antigravity/app_storage.json`) | `%APPDATA%\Antigravity\app_storage.json` |
+
+---
+
+## Linux Dynamic Titlebar Fix (`titleBarOverlay`)
+
+> **Linux-only:** `patch_titlebar_overlay.py` is exclusively for Linux. Windows natively supports `titleBarOverlay` and macOS uses native window chrome, so the CLI safely refuses to run on non-Linux systems (`unsupported_platform` exit `1`, or `skipped_non_linux` exit `0` with `--fail-safe`) with zero filesystem changes, and the injected `V2` patch keeps upstream `win32` JS behavior 100% untouched.
+
+On Linux, Antigravity 2 v2.33.0 gates Electron's `window:set-title-bar-overlay` IPC handler to `win32` and initializes `titleBarOverlay` with a hardcoded `#131313` dark / `#FAFAFA` light box behind the top-right window controls (`_ □ ×`).
+
+`patch_titlebar_overlay.py` applies a pure-Python stdlib patch directly to `/opt/Antigravity/resources/app.asar` (creating a timestamped `.bak` backup and recalculating full SHA-256 ASAR integrity metadata) so switching themes dynamically updates both the titlebar overlay background and WCAG contrast-aware button symbols with zero startup flash:
+
+```bash
+# 1. Inspect /opt/Antigravity/resources/app.asar and simulate the patch (read-only)
+python3 patch_titlebar_overlay.py --check
+python3 patch_titlebar_overlay.py --dry-run
+
+# 2. Apply the patch (requires root for /opt/Antigravity), then restart Antigravity 2
+sudo python3 patch_titlebar_overlay.py --apply
+
+# 3. Optional (Arch Linux): install a fail-safe pacman PostTransaction hook
+#    so future `antigravity` package upgrades automatically re-apply the patch
+sudo python3 patch_titlebar_overlay.py --install-hook
+
+# Restore the original app.asar backup or remove the pacman hook anytime
+sudo python3 patch_titlebar_overlay.py --restore
+sudo python3 patch_titlebar_overlay.py --uninstall-hook
+```
 
 ---
 
@@ -142,16 +169,18 @@ Defined in [bohemian-art-nouveau-light.json](themes/bohemian-art-nouveau-light.j
 
 ```text
 bohemian-art-nouveau/
-├── .github/workflows/ci.yml   # Linux & Windows unit test CI
-├── assets/logo.svg            # Vector plugin emblem
-├── docs/                      # Offline HTML preview & palette reference
-├── tests/test_theme.py        # Schema, palette, WCAG, lifecycle & PII tests
-├── themes/                    # Light & Dark PluginThemeItem JSON presets
-├── CHANGELOG.md               # Release history
-├── LICENSE                    # MIT License
-├── README.md                  # Documentation
-├── apply_theme.py             # Cross-platform CLI installer & theme applier
-└── plugin.json                # Antigravity 2 plugin manifest
+├── .github/workflows/ci.yml                 # Linux & Windows unit test CI
+├── assets/logo.svg                          # Vector plugin emblem
+├── docs/                                    # Offline HTML preview & palette reference
+├── tests/test_patch_titlebar_overlay.py     # Cross-platform ASAR patcher & JS tests
+├── tests/test_theme.py                      # Schema, palette, WCAG, lifecycle & PII tests
+├── themes/                                  # Light & Dark PluginThemeItem JSON presets
+├── CHANGELOG.md                             # Release history
+├── LICENSE                                  # MIT License
+├── README.md                                # Documentation
+├── apply_theme.py                           # Cross-platform CLI installer & theme applier
+├── patch_titlebar_overlay.py                # Pure-Python ASAR patcher & pacman hook CLI
+└── plugin.json                              # Antigravity 2 plugin manifest
 ```
 
 ---

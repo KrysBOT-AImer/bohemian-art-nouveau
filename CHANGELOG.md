@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-20
+
+### Added
+
+- Pure-Python stdlib Linux-only ASAR patcher (`patch_titlebar_overlay.py`) enabling dynamic `titleBarOverlay` updates and startup persistence in Antigravity 2 on Linux, with atomic writes, timestamped `.bak` backups, full SHA-256 ASAR integrity recalculation, and optional fail-safe Arch Linux `pacman` `PostTransaction` hook (`--install-hook` / `--uninstall-hook`).
+- Cross-platform unit & Node runtime test suite (`tests/test_patch_titlebar_overlay.py`) covering ASAR Pickle alignment, integrity verification, non-Linux refusal, `V1` → `V2` upgrade, `pacman` hook lifecycle, and `linux` vs `win32`/`darwin` runtime behavior.
+
+### Changed
+
+- Strict Linux-only enforcement on both layers: the Python CLI cleanly refuses Windows and macOS (`unsupported_platform` exit `1`, or `skipped_non_linux` exit `0` under `--fail-safe`) with zero filesystem mutations; the injected JS (`V2`) gates all overlay persistence and startup overrides strictly on `process.platform === 'linux'` so upstream `win32` behavior remains 100% untouched, with seamless in-place `V1` → `V2` upgrade support (`--check` reports `outdated_v1` with exit `2`).
+
 ## [1.0.0] - 2026-11-20
 
 ### Added

@@ -196,16 +196,33 @@ def _build_synthetic_asar(
     return packed_files
 
 
+def _is_working_js_runtime(cmd_prefix: list[str], env: dict[str, str]) -> bool:
+    """Return True if the candidate Node/Electron runtime executes cleanly."""
+    try:
+        proc = subprocess.run(
+            [*cmd_prefix, "--version"],
+            env=env,
+            capture_output=True,
+            check=False,
+        )
+        return proc.returncode == 0
+    except OSError:
+        return False
+
+
 def _find_js_runtime() -> tuple[list[str], dict[str, str]] | None:
     """Return command prefix + env for Node syntax/runtime checks if available."""
     node_bin = shutil.which("node")
     if node_bin:
-        return [node_bin], os.environ.copy()
+        node_env = os.environ.copy()
+        if _is_working_js_runtime([node_bin], node_env):
+            return [node_bin], node_env
     agy_bin = Path("/opt/Antigravity/antigravity")
     if sys.platform.startswith("linux") and agy_bin.is_file():
         env = os.environ.copy()
         env["ELECTRON_RUN_AS_NODE"] = "1"
-        return [str(agy_bin)], env
+        if _is_working_js_runtime([str(agy_bin)], env):
+            return [str(agy_bin)], env
     return None
 
 
@@ -659,30 +676,42 @@ class PatchTitlebarOverlayTests(unittest.TestCase):
                 "#!/usr/bin/env python3\n",
             )
 
-    @mock.patch.object(patcher.sys, "platform", "linux")
-    def test_v1_to_v2_upgrade_lifecycle(self) -> None:
+    def _assert_legacy_upgrade_lifecycle(
+        self,
+        *,
+        version_tag: str,
+        ipc_replacement: str,
+        utils_block1: str,
+        utils_block2: str,
+        legacy_marker: str,
+    ) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            asar_path = root / "v1_app.asar"
-            v1_ipc, v1_utils = _build_synthetic_js(
-                ipc_anchor=patcher.IPC_HANDLERS_V1_REPLACEMENT,
-                utils_block1=patcher.UTILS_BLOCK1_V1_REPLACEMENT,
-                utils_block2=patcher.UTILS_BLOCK2_V1_REPLACEMENT,
+            asar_path = root / f"{version_tag}_app.asar"
+            legacy_ipc, legacy_utils = _build_synthetic_js(
+                ipc_anchor=ipc_replacement,
+                utils_block1=utils_block1,
+                utils_block2=utils_block2,
             )
-            _build_synthetic_asar(asar_path, ipc_bytes=v1_ipc, utils_bytes=v1_utils)
-            v1_bytes = asar_path.read_bytes()
+            _build_synthetic_asar(
+                asar_path, ipc_bytes=legacy_ipc, utils_bytes=legacy_utils
+            )
+            legacy_bytes = asar_path.read_bytes()
 
-            # --check reports outdated_v1 with exit 2 (0 under --fail-safe)
+            expected_outdated_status = f"outdated_{version_tag}"
+            expected_file_state = f"patched_{version_tag}"
+
+            # --check reports outdated_vX with exit 2 (0 under --fail-safe)
             code, out, err = _run_cli(["--check", "--asar-path", str(asar_path), "--json"])
             self.assertEqual(code, 2, err)
             check_data = json.loads(out)
-            self.assertEqual(check_data["status"], "outdated_v1")
+            self.assertEqual(check_data["status"], expected_outdated_status)
             self.assertEqual(check_data["exit_code"], 2)
             self.assertEqual(
                 check_data["files"],
                 {
-                    patcher.IPC_HANDLERS_REL_PATH: "patched_v1",
-                    patcher.UTILS_REL_PATH: "patched_v1",
+                    patcher.IPC_HANDLERS_REL_PATH: expected_file_state,
+                    patcher.UTILS_REL_PATH: expected_file_state,
                 },
             )
 
@@ -690,26 +719,26 @@ class PatchTitlebarOverlayTests(unittest.TestCase):
                 ["--check", "--fail-safe", "--asar-path", str(asar_path), "--json"]
             )
             self.assertEqual(code_fs, 0)
-            self.assertEqual(json.loads(out_fs)["status"], "outdated_v1")
+            self.assertEqual(json.loads(out_fs)["status"], expected_outdated_status)
 
             # --dry-run reports ready upgrade and touches nothing
             code, out, _ = _run_cli(["--dry-run", "--asar-path", str(asar_path), "--json"])
             self.assertEqual(code, 0)
             dry_data = json.loads(out)
             self.assertEqual(dry_data["status"], "dry_run_ready")
-            self.assertEqual(dry_data.get("upgraded_from"), "v1")
-            self.assertEqual(asar_path.read_bytes(), v1_bytes)
-            self.assertEqual(list(root.glob("v1_app.asar.*.bak")), [])
+            self.assertEqual(dry_data.get("upgraded_from"), version_tag)
+            self.assertEqual(asar_path.read_bytes(), legacy_bytes)
+            self.assertEqual(list(root.glob(f"{version_tag}_app.asar.*.bak")), [])
 
-            # --apply creates backup and upgrades V1 -> V2
+            # --apply creates backup and upgrades legacy -> V3
             code, out, err = _run_cli(["--apply", "--asar-path", str(asar_path), "--json"])
             self.assertEqual(code, 0, err)
             apply_data = json.loads(out)
             self.assertEqual(apply_data["status"], "patched")
-            self.assertEqual(apply_data.get("upgraded_from"), "v1")
+            self.assertEqual(apply_data.get("upgraded_from"), version_tag)
             self.assertTrue(apply_data["changed"])
             backup_path = Path(apply_data["backup_path"])
-            self.assertEqual(backup_path.read_bytes(), v1_bytes)
+            self.assertEqual(backup_path.read_bytes(), legacy_bytes)
             self.assertTrue(patcher.verify_asar_integrity(asar_path)["valid"])
 
             upgraded_ipc = patcher.read_asar_file(
@@ -720,8 +749,8 @@ class PatchTitlebarOverlayTests(unittest.TestCase):
             ).decode("utf-8")
             self.assertIn(patcher.PATCH_MARKER, upgraded_ipc)
             self.assertIn(patcher.PATCH_MARKER, upgraded_utils)
-            self.assertNotIn(patcher.LEGACY_PATCH_MARKER_V1, upgraded_ipc)
-            self.assertNotIn(patcher.LEGACY_PATCH_MARKER_V1, upgraded_utils)
+            self.assertNotIn(legacy_marker, upgraded_ipc)
+            self.assertNotIn(legacy_marker, upgraded_utils)
 
             # Subsequent --check exits 0 ('patched') and second --apply is idempotent
             code, out, _ = _run_cli(["--check", "--asar-path", str(asar_path), "--json"])
@@ -733,24 +762,44 @@ class PatchTitlebarOverlayTests(unittest.TestCase):
             second_data = json.loads(out)
             self.assertEqual(second_data["status"], "already_patched")
             self.assertFalse(second_data["changed"])
-            self.assertEqual(len(list(root.glob("v1_app.asar.*.bak"))), 1)
+            self.assertEqual(len(list(root.glob(f"{version_tag}_app.asar.*.bak"))), 1)
 
-            # --restore recovers exact pre-upgrade V1 bytes
+            # --restore recovers exact pre-upgrade legacy bytes
             code, out, _ = _run_cli(["--restore", "--asar-path", str(asar_path), "--json"])
             self.assertEqual(code, 0)
             self.assertEqual(json.loads(out)["status"], "restored")
-            self.assertEqual(asar_path.read_bytes(), v1_bytes)
+            self.assertEqual(asar_path.read_bytes(), legacy_bytes)
 
-            # Mixed V1 + V2 reports partially_patched (exit 1)
-            mixed = root / "mixed.asar"
+            # Mixed legacy + V3 reports partially_patched (exit 1)
+            mixed = root / f"mixed_{version_tag}.asar"
             _build_synthetic_asar(
                 mixed,
-                ipc_bytes=v1_ipc,
+                ipc_bytes=legacy_ipc,
                 utils_bytes=upgraded_utils.encode("utf-8"),
             )
             code, out, _ = _run_cli(["--check", "--asar-path", str(mixed), "--json"])
             self.assertEqual(code, 1)
             self.assertEqual(json.loads(out)["status"], "partially_patched")
+
+    @mock.patch.object(patcher.sys, "platform", "linux")
+    def test_v1_to_v2_upgrade_lifecycle(self) -> None:
+        self._assert_legacy_upgrade_lifecycle(
+            version_tag="v1",
+            ipc_replacement=patcher.IPC_HANDLERS_V1_REPLACEMENT,
+            utils_block1=patcher.UTILS_BLOCK1_V1_REPLACEMENT,
+            utils_block2=patcher.UTILS_BLOCK2_V1_REPLACEMENT,
+            legacy_marker=patcher.LEGACY_PATCH_MARKER_V1,
+        )
+
+    @mock.patch.object(patcher.sys, "platform", "linux")
+    def test_v2_to_v3_upgrade_lifecycle(self) -> None:
+        self._assert_legacy_upgrade_lifecycle(
+            version_tag="v2",
+            ipc_replacement=patcher.IPC_HANDLERS_V2_REPLACEMENT,
+            utils_block1=patcher.UTILS_BLOCK1_V2_REPLACEMENT,
+            utils_block2=patcher.UTILS_BLOCK2_V2_REPLACEMENT,
+            legacy_marker=patcher.LEGACY_PATCH_MARKER_V2,
+        )
 
     @mock.patch.object(patcher.sys, "platform", "linux")
     def test_patched_js_syntax_and_runtime_behavior(self) -> None:
@@ -880,7 +929,7 @@ async function runTests() {{
 
     // Throws and missing setTitleBarOverlay are ignored safely
     shouldThrowOverlay = true;
-    await handler({{}}, {{ color: '#F3EFE8', symbolColor: '#162B37' }});
+    await handler({{}}, {{ color: '#F2ECE3', symbolColor: '#162B37' }});
     shouldThrowOverlay = false;
 
     const noOverlayWin = {{}};
@@ -910,7 +959,7 @@ async function runTests() {{
     utilsExports.createWindow('about:blank', storageManager, {{}});
     assert.deepStrictEqual(browserWindowArgs[1].titleBarOverlay, {{
         color: '#F3EFE8',
-        symbolColor: '#383A42',
+        symbolColor: '#162B37',
         height: 30,
     }});
 
@@ -918,7 +967,7 @@ async function runTests() {{
     storageManager.getItemsSync = () => {{
         getItemsSyncCalls += 1;
         return {{
-            titleBarOverlayColor: '#EFE4D2',
+            titleBarOverlayColor: '#F0E7D8',
             titleBarOverlaySymbolColor: '#162B37',
             titleBarOverlaySurfaceColor: '#F3EFE8',
         }};
@@ -926,7 +975,28 @@ async function runTests() {{
     utilsExports.createWindow('about:blank', storageManager, {{}});
     assert.deepStrictEqual(browserWindowArgs[2].titleBarOverlay, {{
         color: '#162B37',
-        symbolColor: '#FAFAFA',
+        symbolColor: '#EFE4D2',
+        height: 30,
+    }});
+
+    // Startup: missing/invalid curtainColor on Linux falls back to Bohemian Art Nouveau tiers
+    storageManager.getItemsSync = () => {{
+        getItemsSyncCalls += 1;
+        return {{}};
+    }};
+    utilsExports.setMockState({{ curtainColor: '', themeMode: 'LIGHT' }});
+    utilsExports.createWindow('about:blank', storageManager, {{}});
+    assert.deepStrictEqual(browserWindowArgs[3].titleBarOverlay, {{
+        color: '#F0E7D8',
+        symbolColor: '#162B37',
+        height: 30,
+    }});
+
+    utilsExports.setMockState({{ curtainColor: '', themeMode: 'DARK' }});
+    utilsExports.createWindow('about:blank', storageManager, {{}});
+    assert.deepStrictEqual(browserWindowArgs[4].titleBarOverlay, {{
+        color: '#193341',
+        symbolColor: '#EFE4D2',
         height: 30,
     }});
 
@@ -956,7 +1026,7 @@ async function runTests() {{
         height: 30,
     }});
 
-    utilsExports.setMockState({{ curtainColor: '#F3EFE8', themeMode: 'LIGHT' }});
+    utilsExports.setMockState({{ curtainColor: '#EFE4D2', themeMode: 'LIGHT' }});
     utilsExports.createWindow('about:blank', storageManager, {{}});
     assert.strictEqual(getItemsSyncCalls, syncCallsBeforeNonLinux);
     assert.deepStrictEqual(browserWindowArgs[browserWindowArgs.length - 1].titleBarOverlay, {{

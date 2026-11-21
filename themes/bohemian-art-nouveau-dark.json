@@ -7,7 +7,7 @@
     "foreground": "#EFE4D2",
     "primary": "#D4A853",
     "primary_foreground": "#162B37",
-    "code_foreground": "#DFBE7A"
+    "code_foreground": "#D4A853"
   },
   "syntax": {
     "comment": "#7B8C7E",

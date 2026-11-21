@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-11-21
+
+### Changed
+
+- Synced Light (`4000K Daylight`) and Dark (`2700K Warm Evening`) theme presets, installers, Linux ASAR titlebar patcher, manifest, and documentation to **100% parity with Bohemian Art Nouveau Design System v2.0.0** (`8c020ea`, Crisp Flat-Tonal Minimalism):
+  - Anchored Light `background` on `#F3EFE8` (Warm Chalk; `12.77:1` AAA primary text, `11.07:1` AAA accent, `6.49:1` AA inline code) stepping through `#F1EADD` → `#F0E7D8` → `#EFE4D2`.
+  - Updated Dark `code_foreground` seed from `#DFBE7A` to `#D4A853` (Amber Gold; `6.64:1` AA on `#162B37`).
+  - Updated `apply_theme.py` to align `hubSurfaceBackgroundColor` and `titleBarOverlay*` surface tiers with KDE Light/Dark ground truth (`#F3EFE8`/`#F0E7D8`/`#162B37` Light; `#162B37`/`#193341`/`#EFE4D2` Dark).
+  - Upgraded `patch_titlebar_overlay.py` to `V3` with Bohemian Linux fallback colors (`#F0E7D8`/`#162B37` Light, `#193341`/`#EFE4D2` Dark) and seamless `V1`/`V2` → `V3` in-place upgrade support while keeping upstream anchors and `win32`/`darwin` behavior untouched.
+  - Updated `assets/logo.svg` inner arch, inner diamond, and crown dot accents from `#F3EFE8` to `#EFE4D2` (2700K Soft Alabaster ink on `#162B37`).
+  - Synced `docs/bohemian-art-nouveau-preview.html`, `README.md`, and `plugin.json` (`2.0.0`) to Crisp Flat-Tonal Minimalism (`Newsreader`, `Inter`, `JetBrains Mono`, modern `4px`–`10px` radii, flat solid `#C29B53`/`#D4A853`, and KDE v2.0.0 16-page ground truth); removed stale 17-page `docs/PNG of PDF/`.
+
+### Added
+
+- Added Design System v2.0.0 reference tables to `README.md`: Crisp Flat-Tonal Minimalism typography & radii, stepped surface ladders and semantic statuses, core guardrails and banned hex list, Light & Dark WCAG contrast ratios for all 18 syntax tokens, and the 24-color Terminal ANSI palette.
+
 ## [1.1.0] - 2026-11-20
 
 ### Added

@@ -1,8 +1,8 @@
 {
   "name": "bohemian-art-nouveau",
   "displayName": "Bohemian Art Nouveau",
-  "version": "1.1.0",
-  "description": "Architectural Light (4000K Day) and Dark (2700K Evening) Antigravity 2 themes inspired by Bohemian Art Nouveau 60-25-10-5 interior color balance.",
+  "version": "2.0.0",
+  "description": "Dual-lighting 4000K Daylight (Warm Chalk) and 2700K Warm Evening (Midnight Petrol) Antigravity 2 themes built on Bohemian Art Nouveau Design System v2.0.0.",
   "logo": "assets/logo.svg",
   "author": "KrysBOT-AImer",
   "homepage": "https://github.com/KrysBOT-AImer/bohemian-art-nouveau",

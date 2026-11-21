@@ -23,7 +23,8 @@ DEFAULT_SCRIPT_INSTALL_PATH = Path(
     "/usr/local/libexec/antigravity-patch-titlebar-overlay.py"
 )
 
-PATCH_MARKER = "/* AGY_LINUX_TITLEBAR_OVERLAY_PATCH_V2 */"
+PATCH_MARKER = "/* AGY_LINUX_TITLEBAR_OVERLAY_PATCH_V3 */"
+LEGACY_PATCH_MARKER_V2 = "/* AGY_LINUX_TITLEBAR_OVERLAY_PATCH_V2 */"
 LEGACY_PATCH_MARKER_V1 = "/* AGY_LINUX_TITLEBAR_OVERLAY_PATCH_V1 */"
 DEFAULT_INTEGRITY_BLOCK_SIZE = 4194304
 
@@ -69,6 +70,72 @@ IPC_HANDLERS_V1_REPLACEMENT = f"""\
             return (0, utils_1.normalizeHexSurfaceColor)(trimmed);
         }};
         if (win && (process.platform === 'win32' || process.platform === 'linux') && options && typeof options === 'object') {{
+            const overlayColor = normalizeOverlayColor(options.color);
+            const overlaySymbolColor = normalizeOverlayColor(options.symbolColor);
+            const resolvedColor = overlayColor ?? options.color;
+            if (typeof win.setTitleBarOverlay === 'function' && typeof resolvedColor === 'string' && resolvedColor.trim().length > 0) {{
+                try {{
+                    win.setTitleBarOverlay({{
+                        color: resolvedColor,
+                        symbolColor: overlaySymbolColor ?? options.symbolColor,
+                        height: 30,
+                    }});
+                }}
+                catch {{
+                    // Ignore platforms or windows without titleBarOverlay support.
+                }}
+            }}
+            const updates = {{}};
+            if (overlayColor) {{
+                updates.titleBarOverlayColor = overlayColor;
+            }}
+            if (overlaySymbolColor) {{
+                updates.titleBarOverlaySymbolColor = overlaySymbolColor;
+            }}
+            if (Object.keys(updates).length > 0) {{
+                const surfaceColor = (0, utils_1.normalizeHexSurfaceColor)((0, utils_1.getHubCurtainColor)(win));
+                if (surfaceColor) {{
+                    updates.titleBarOverlaySurfaceColor = surfaceColor;
+                }}
+                await Promise.resolve(storageManager?.updateItems(updates)).catch(() => undefined);
+            }}
+        }}
+    }});"""
+
+IPC_HANDLERS_V2_REPLACEMENT = f"""\
+    electron_1.ipcMain.handle('window:set-title-bar-overlay', async (event, options) => {{
+        {LEGACY_PATCH_MARKER_V2}
+        const win = getTargetHubWindow(event?.sender);
+        if (win && process.platform === 'win32') {{
+            win.setTitleBarOverlay({{
+                color: options.color,
+                symbolColor: options.symbolColor,
+                height: 30,
+            }});
+        }}
+        else if (win && process.platform === 'linux' && options && typeof options === 'object') {{
+            const normalizeOverlayColor = (val) => {{
+                if (typeof val !== 'string') {{
+                    return undefined;
+                }}
+                const trimmed = val.trim();
+                if (/^#[0-9a-fA-F]{{6}}$/.test(trimmed)) {{
+                    return trimmed.toUpperCase();
+                }}
+                const shortHex = /^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/.exec(trimmed);
+                if (shortHex) {{
+                    return `#${{shortHex[1]}}${{shortHex[1]}}${{shortHex[2]}}${{shortHex[2]}}${{shortHex[3]}}${{shortHex[3]}}`.toUpperCase();
+                }}
+                const rgbMatch = /^rgba?\\(\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*[,\\s]\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*[,\\s]\\s*([+-]?\\d+(?:\\.\\d+)?)(?:\\s*[,/]\\s*([+-]?\\d*(?:\\.\\d+)?%?))?\\s*\\)$/i.exec(trimmed);
+                if (rgbMatch) {{
+                    const toHex = (n) => Math.max(0, Math.min(255, Math.round(Number(n))))
+                        .toString(16)
+                        .padStart(2, '0')
+                        .toUpperCase();
+                    return `#${{toHex(rgbMatch[1])}}${{toHex(rgbMatch[2])}}${{toHex(rgbMatch[3])}}`;
+                }}
+                return (0, utils_1.normalizeHexSurfaceColor)(trimmed);
+            }};
             const overlayColor = normalizeOverlayColor(options.color);
             const overlaySymbolColor = normalizeOverlayColor(options.symbolColor);
             const resolvedColor = overlayColor ?? options.color;
@@ -212,8 +279,8 @@ UTILS_BLOCK1_V1_REPLACEMENT = f"""\
     const computedContrastSymbolColor = computeContrastSymbolColor(overlayColor);
     const overlaySymbolColor = (storedOverlaySymbol && surfaceMatches) ? storedOverlaySymbol : computedContrastSymbolColor;"""
 
-UTILS_BLOCK1_REPLACEMENT = f"""\
-    {PATCH_MARKER}
+UTILS_BLOCK1_V2_REPLACEMENT = f"""\
+    {LEGACY_PATCH_MARKER_V2}
     const theme = getThemeMode().toUpperCase();
     const isLight = theme.includes('LIGHT');
     const backgroundColor = isLight ? '#FAFAFA' : '#131313';
@@ -255,6 +322,53 @@ UTILS_BLOCK1_REPLACEMENT = f"""\
         overlaySymbolColor = (storedOverlaySymbol && surfaceMatches) ? storedOverlaySymbol : computedContrastSymbolColor;
     }}"""
 
+UTILS_BLOCK1_REPLACEMENT = f"""\
+    {PATCH_MARKER}
+    const theme = getThemeMode().toUpperCase();
+    const isLight = theme.includes('LIGHT');
+    const backgroundColor = isLight ? '#FAFAFA' : '#131313';
+    const foregroundColor = isLight ? '#383A42' : '#FAFAFA';
+    let overlayColor = backgroundColor;
+    let overlaySymbolColor = foregroundColor;
+    if (process.platform === 'linux') {{
+        let overlayStorageItems = {{}};
+        if (typeof storageManager?.getItemsSync === 'function') {{
+            try {{
+                overlayStorageItems = asRecord(storageManager.getItemsSync()) ?? {{}};
+            }}
+            catch {{
+                overlayStorageItems = {{}};
+            }}
+        }}
+        else {{
+            overlayStorageItems = readAppStorageSync();
+        }}
+        const fallbackSurfaceColor = isLight ? '#F3EFE8' : '#162B37';
+        const fallbackOverlayColor = isLight ? '#F0E7D8' : '#193341';
+        const fallbackSymbolColor = isLight ? '#162B37' : '#EFE4D2';
+        const rawCurtainColor = normalizeHexSurfaceColor(getHubCurtainColor());
+        const initialCurtainColor = rawCurtainColor ?? fallbackSurfaceColor;
+        const storedOverlayColor = normalizeHexSurfaceColor(overlayStorageItems['titleBarOverlayColor']);
+        const storedOverlaySymbol = normalizeHexSurfaceColor(overlayStorageItems['titleBarOverlaySymbolColor']);
+        const storedOverlaySurface = normalizeHexSurfaceColor(overlayStorageItems['titleBarOverlaySurfaceColor']);
+        const surfaceMatches = !storedOverlaySurface || storedOverlaySurface === initialCurtainColor;
+        overlayColor = (storedOverlayColor && surfaceMatches) ? storedOverlayColor : (rawCurtainColor ?? fallbackOverlayColor);
+        const computeContrastSymbolColor = (hexColor) => {{
+            if (!/^#[0-9A-Fa-f]{{6}}$/.test(hexColor)) {{
+                return fallbackSymbolColor;
+            }}
+            const clean = hexColor.slice(1);
+            const toLinear = (offset) => {{
+                const c = parseInt(clean.slice(offset, offset + 2), 16) / 255;
+                return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            }};
+            const lum = 0.2126 * toLinear(0) + 0.7152 * toLinear(2) + 0.0722 * toLinear(4);
+            return lum > 0.179 ? '#162B37' : '#EFE4D2';
+        }};
+        const computedContrastSymbolColor = computeContrastSymbolColor(overlayColor);
+        overlaySymbolColor = (storedOverlaySymbol && surfaceMatches) ? storedOverlaySymbol : computedContrastSymbolColor;
+    }}"""
+
 UTILS_BLOCK2_ANCHOR = """\
         titleBarStyle: 'hidden',
         titleBarOverlay: isMacOS()
@@ -277,6 +391,7 @@ UTILS_BLOCK2_REPLACEMENT = """\
             },
         backgroundColor,"""
 
+UTILS_BLOCK2_V2_REPLACEMENT = UTILS_BLOCK2_REPLACEMENT
 UTILS_BLOCK2_V1_REPLACEMENT = UTILS_BLOCK2_REPLACEMENT
 
 
@@ -627,6 +742,8 @@ def _classify_ipc_handlers(text: str) -> str:
     """Classify dist/ipcHandlers.js patch state."""
     if PATCH_MARKER in text:
         return "patched"
+    if text.count(IPC_HANDLERS_V2_REPLACEMENT) == 1:
+        return "patched_v2"
     if text.count(IPC_HANDLERS_V1_REPLACEMENT) == 1:
         return "patched_v1"
     if text.count(IPC_HANDLERS_ANCHOR) == 1:
@@ -638,6 +755,11 @@ def _classify_utils(text: str) -> str:
     """Classify dist/utils.js patch state."""
     if PATCH_MARKER in text:
         return "patched"
+    if (
+        text.count(UTILS_BLOCK1_V2_REPLACEMENT) == 1
+        and text.count(UTILS_BLOCK2_V2_REPLACEMENT) == 1
+    ):
+        return "patched_v2"
     if (
         text.count(UTILS_BLOCK1_V1_REPLACEMENT) == 1
         and text.count(UTILS_BLOCK2_V1_REPLACEMENT) == 1
@@ -658,12 +780,16 @@ def patch_ipc_handlers_js(text: str) -> str:
         return text
     if state == "unpatched":
         return text.replace(IPC_HANDLERS_ANCHOR, IPC_HANDLERS_REPLACEMENT, 1)
+    if state == "patched_v2":
+        return text.replace(
+            IPC_HANDLERS_V2_REPLACEMENT, IPC_HANDLERS_REPLACEMENT, 1
+        )
     if state == "patched_v1":
         return text.replace(
             IPC_HANDLERS_V1_REPLACEMENT, IPC_HANDLERS_REPLACEMENT, 1
         )
     raise AsarError(
-        f"Incompatible {IPC_HANDLERS_REL_PATH}: expected 1 anchor or V1 match, "
+        f"Incompatible {IPC_HANDLERS_REL_PATH}: expected 1 anchor, V1, or V2 match, "
         f"found anchor={text.count(IPC_HANDLERS_ANCHOR)}"
     )
 
@@ -676,6 +802,13 @@ def patch_utils_js(text: str) -> str:
     if state == "unpatched":
         patched = text.replace(UTILS_BLOCK1_ANCHOR, UTILS_BLOCK1_REPLACEMENT, 1)
         return patched.replace(UTILS_BLOCK2_ANCHOR, UTILS_BLOCK2_REPLACEMENT, 1)
+    if state == "patched_v2":
+        patched = text.replace(
+            UTILS_BLOCK1_V2_REPLACEMENT, UTILS_BLOCK1_REPLACEMENT, 1
+        )
+        return patched.replace(
+            UTILS_BLOCK2_V2_REPLACEMENT, UTILS_BLOCK2_REPLACEMENT, 1
+        )
     if state == "patched_v1":
         patched = text.replace(
             UTILS_BLOCK1_V1_REPLACEMENT, UTILS_BLOCK1_REPLACEMENT, 1
@@ -726,9 +859,14 @@ def check_asar(asar_path: Path) -> dict[str, Any]:
         overall = "patched"
     elif ipc_state == "unpatched" and utils_state == "unpatched":
         overall = "unpatched"
+    elif ipc_state == "patched_v2" and utils_state == "patched_v2":
+        overall = "outdated_v2"
     elif ipc_state == "patched_v1" and utils_state == "patched_v1":
         overall = "outdated_v1"
-    elif any(s in ("patched", "patched_v1") for s in (ipc_state, utils_state)):
+    elif any(
+        s in ("patched", "patched_v2", "patched_v1")
+        for s in (ipc_state, utils_state)
+    ):
         overall = "partially_patched"
     else:
         overall = "incompatible"
@@ -823,13 +961,18 @@ def apply_patch(asar_path: Path, dry_run: bool = False) -> dict[str, Any]:
             "files": check_info["files"],
         }
 
-    if status not in ("unpatched", "outdated_v1"):
+    if status not in ("unpatched", "outdated_v1", "outdated_v2"):
         error_msg = check_info.get("error") or (
             f"Cannot apply patch: ASAR status is {status} ({check_info['files']})"
         )
         raise AsarError(error_msg)
 
-    upgraded_from = "v1" if status == "outdated_v1" else None
+    if status == "outdated_v2":
+        upgraded_from = "v2"
+    elif status == "outdated_v1":
+        upgraded_from = "v1"
+    else:
+        upgraded_from = None
 
     ipc_text = read_asar_file(asar_path, IPC_HANDLERS_REL_PATH).decode("utf-8")
     utils_text = read_asar_file(asar_path, UTILS_REL_PATH).decode("utf-8")
@@ -1054,7 +1197,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  1: Unsupported non-Linux platform (unsupported_platform), operational "
             "error, incompatible ASAR, partially_patched, or missing backup "
             "(unless --fail-safe is set)\n"
-            "  2: --check reports 'unpatched' or 'outdated_v1' (unless --fail-safe is set)"
+            "  2: --check reports 'unpatched', 'outdated_v1', or 'outdated_v2' (unless --fail-safe is set)"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -1062,7 +1205,7 @@ def build_parser() -> argparse.ArgumentParser:
     action.add_argument(
         "--check",
         action="store_true",
-        help="Read-only check of app.asar patch state (exit 0=patched, 2=unpatched/outdated_v1, 1=partially_patched/incompatible/unsupported_platform).",
+        help="Read-only check of app.asar patch state (exit 0=patched, 2=unpatched/outdated_v1/outdated_v2, 1=partially_patched/incompatible/unsupported_platform).",
     )
     action.add_argument(
         "--apply",
@@ -1183,7 +1326,7 @@ def main(argv: list[str] | None = None) -> int:
             status = check_result["status"]
             if status == "patched":
                 exit_code = 0
-            elif status in ("unpatched", "outdated_v1"):
+            elif status in ("unpatched", "outdated_v1", "outdated_v2"):
                 exit_code = 0 if args.fail_safe else 2
             else:
                 exit_code = 0 if args.fail_safe else 1

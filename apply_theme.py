@@ -27,6 +27,18 @@ RUNTIME_PLUGIN_FILES = (
     "themes/bohemian-art-nouveau-light.json",
     "themes/bohemian-art-nouveau-dark.json",
 )
+TITLEBAR_OVERLAY_TIERS: dict[str, dict[str, str]] = {
+    "light": {
+        "color": "#F0E7D8",
+        "symbol": "#162B37",
+        "surface": "#F3EFE8",
+    },
+    "dark": {
+        "color": "#193341",
+        "symbol": "#EFE4D2",
+        "surface": "#162B37",
+    },
+}
 
 
 class AntigravityRunningError(RuntimeError):
@@ -407,12 +419,20 @@ def apply_theme(
         storage_data["theme-preset-dark"] = preset
 
     theme_mode = user_settings.get("themeMode")
-    if theme_mode == "THEME_MODE_LIGHT" and apply_light:
-        storage_data["hubSurfaceBackgroundColor"] = seeds["light"]["background"]
-    elif apply_dark:
-        storage_data["hubSurfaceBackgroundColor"] = seeds["dark"]["background"]
-    elif apply_light:
-        storage_data["hubSurfaceBackgroundColor"] = seeds["light"]["background"]
+    active_mode = (
+        "light"
+        if (theme_mode == "THEME_MODE_LIGHT" and apply_light)
+        or (not apply_dark and apply_light)
+        else "dark"
+    )
+    storage_data["hubSurfaceBackgroundColor"] = seeds[active_mode]["background"]
+    storage_data["titleBarOverlayColor"] = TITLEBAR_OVERLAY_TIERS[active_mode]["color"]
+    storage_data["titleBarOverlaySymbolColor"] = TITLEBAR_OVERLAY_TIERS[active_mode][
+        "symbol"
+    ]
+    storage_data["titleBarOverlaySurfaceColor"] = TITLEBAR_OVERLAY_TIERS[active_mode][
+        "surface"
+    ]
 
     config_backup: Path | None = None
     storage_backup: Path | None = None
@@ -498,6 +518,12 @@ def uninstall_theme(
         storage_data = _read_json_dict(storage_path)
         storage_data["theme-preset-light"] = "Default Light"
         storage_data["theme-preset-dark"] = "Default Dark"
+        for key in (
+            "titleBarOverlayColor",
+            "titleBarOverlaySymbolColor",
+            "titleBarOverlaySurfaceColor",
+        ):
+            storage_data.pop(key, None)
         storage_updated = True
         if not dry_run:
             storage_backup = create_backup(storage_path, preserve_mode_0600=False)

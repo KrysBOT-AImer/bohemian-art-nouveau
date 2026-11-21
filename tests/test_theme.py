@@ -24,22 +24,37 @@ if str(BUNDLE_DIR) not in sys.path:
 import apply_theme as theme_cli  # noqa: E402
 
 PALETTE_HEX_ALLOWLIST = {
-    # Core 60-25-10-5 (Day & Evening)
-    "#F3EFE8", "#EFE4D2",
-    "#1A3644", "#162B37",
+    # 4000K Light stepped surfaces
+    "#EFE4D2", "#F0E7D8", "#F1EADD", "#F2ECE3", "#F3EFE8",
+    # 2700K Dark stepped surfaces
+    "#162B37", "#172E3A", "#18313E", "#193341", "#1A3644",
+    # Core & Secondary accents
     "#6C4F3D", "#7A4D33",
     "#C29B53", "#D4A853",
     "#C78A3A", "#D99330",
     "#B85D43", "#C66347",
     "#9E6B47", "#AD734A",
     "#5A3D4D", "#4E3242",
-    # Architectural metalwork & cabinetry shading
-    "#17303D", "#162E3B", "#12242E",
-    "#DFBE7A", "#B38B40", "#946F2D",
-    # Surface materials
-    "#2A2C30", "#C8BEAF", "#E0D9CE", "#1F2023",
-    # Botanical & pastel accents
+    # Extended 10-swatch & Brass gradient
     "#D6A692", "#E8BA9B", "#7B8C7E", "#A89FAD",
+    "#E0D9CE", "#C8BEAF", "#2A2C30", "#1F2023",
+    "#12242E", "#17303D", "#DFBE7A", "#B38B40", "#946F2D",
+    # Semantic & status foregrounds (4000K & 2700K)
+    "#59656A", "#47634D", "#7A581B", "#9A412A",
+    "#9EA29D", "#91A895", "#E6866B",
+}
+
+BANNED_HEX_CODES = {
+    "#FBFAF8",
+    "#1F333F",
+    "#213540",
+    "#233742",
+    "#2B414D",
+    "#1A2E3A",
+    "#244657",
+    "#1A4D66",
+    "#FFFFFF",
+    "#000000",
 }
 
 EXPECTED_SYNTAX_KEYS = {
@@ -212,6 +227,116 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
             self.assertGreaterEqual(
                 code_bg, 4.5, f"{mode} code_foreground/background={code_bg:.2f}"
             )
+
+    def test_v2_design_system_guardrails(self) -> None:
+        manifest = json.loads((BUNDLE_DIR / "plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest.get("version"), "2.0.0")
+        description = manifest.get("description", "")
+        self.assertIn("Warm Chalk", description)
+        self.assertIn("2.0.0", description)
+
+        self.assertTrue(PALETTE_HEX_ALLOWLIST.isdisjoint(BANNED_HEX_CODES))
+        self.assertNotIn("#162E3B", PALETTE_HEX_ALLOWLIST)
+
+        light = json.loads(
+            (BUNDLE_DIR / "themes" / "bohemian-art-nouveau-light.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        dark = json.loads(
+            (BUNDLE_DIR / "themes" / "bohemian-art-nouveau-dark.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        expected_light_seeds = {
+            "background": "#F3EFE8",
+            "foreground": "#162B37",
+            "primary": "#1A3644",
+            "primary_foreground": "#F3EFE8",
+            "code_foreground": "#6C4F3D",
+        }
+        expected_dark_seeds = {
+            "background": "#162B37",
+            "foreground": "#EFE4D2",
+            "primary": "#D4A853",
+            "primary_foreground": "#162B37",
+            "code_foreground": "#D4A853",
+        }
+        self.assertEqual(light["seeds"], expected_light_seeds)
+        self.assertEqual(dark["seeds"], expected_dark_seeds)
+
+        expected_light_syntax = {
+            "attrName": "#9E6B47",
+            "attrValue": "#7A4D33",
+            "builtin": "#946F2D",
+            "className": "#946F2D",
+            "comment": "#7B8C7E",
+            "constant": "#B85D43",
+            "deleted": "#B85D43",
+            "function": "#1A3644",
+            "inserted": "#7B8C7E",
+            "keyword": "#5A3D4D",
+            "number": "#B85D43",
+            "operator": "#2A2C30",
+            "property": "#9E6B47",
+            "punctuation": "#6C4F3D",
+            "regex": "#7A4D33",
+            "string": "#6C4F3D",
+            "tag": "#4E3242",
+            "variable": "#162B37",
+        }
+        expected_dark_syntax = {
+            "attrName": "#D6A692",
+            "attrValue": "#E8BA9B",
+            "builtin": "#B38B40",
+            "className": "#DFBE7A",
+            "comment": "#7B8C7E",
+            "constant": "#C78A3A",
+            "deleted": "#C66347",
+            "function": "#D4A853",
+            "inserted": "#7B8C7E",
+            "keyword": "#A89FAD",
+            "number": "#D99330",
+            "operator": "#E0D9CE",
+            "property": "#C29B53",
+            "punctuation": "#C8BEAF",
+            "regex": "#AD734A",
+            "string": "#E8BA9B",
+            "tag": "#D6A692",
+            "variable": "#EFE4D2",
+        }
+        self.assertEqual(light["syntax"], expected_light_syntax)
+        self.assertEqual(dark["syntax"], expected_dark_syntax)
+
+        strict_files = [
+            BUNDLE_DIR / "themes" / "bohemian-art-nouveau-light.json",
+            BUNDLE_DIR / "themes" / "bohemian-art-nouveau-dark.json",
+            BUNDLE_DIR / "assets" / "logo.svg",
+            BUNDLE_DIR / "apply_theme.py",
+        ]
+        for file_path in strict_files:
+            found = {m.upper() for m in ANY_HEX_RE.findall(file_path.read_text(encoding="utf-8"))}
+            banned_found = found & BANNED_HEX_CODES
+            self.assertEqual(
+                banned_found,
+                set(),
+                f"Banned v2.0.0 hex codes in {file_path.name}: {sorted(banned_found)}",
+            )
+
+        light_min = relative_luminance("#EFE4D2")
+        light_max = relative_luminance("#F3EFE8")
+        for key in ("background", "primary_foreground"):
+            lum = relative_luminance(light["seeds"][key])
+            self.assertGreaterEqual(lum, light_min, f"light {key} below 4000K floor")
+            self.assertLessEqual(lum, light_max, f"light {key} above 4000K ceiling")
+
+        dark_min = relative_luminance("#162B37")
+        dark_max = relative_luminance("#1A3644")
+        for key in ("background", "primary_foreground"):
+            lum = relative_luminance(dark["seeds"][key])
+            self.assertGreaterEqual(lum, dark_min, f"dark {key} below 2700K floor")
+            self.assertLessEqual(lum, dark_max, f"dark {key} above 2700K ceiling")
 
     def test_apply_theme_cross_platform_and_lifecycle(self) -> None:
         fake_home = Path("/tmp/synthetic-home")
@@ -446,6 +571,16 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
                 set(applied_config["userSettings"]["customThemeSeedsDark"].keys()),
                 expected_camel_keys,
             )
+            self.assertEqual(
+                applied_config["userSettings"]["customThemeSeedsLight"]["background"],
+                "#F3EFE8",
+            )
+            self.assertEqual(
+                applied_config["userSettings"]["customThemeSeedsDark"][
+                    "codeForegroundOverride"
+                ],
+                "#D4A853",
+            )
             self.assertEqual(applied_storage["customKey"], "preserve")
             self.assertEqual(
                 applied_storage["theme-preset-light"], "Gruvbox Material"
@@ -455,6 +590,49 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
             )
             self.assertEqual(
                 applied_storage["hubSurfaceBackgroundColor"], "#162B37"
+            )
+            self.assertEqual(
+                applied_storage["titleBarOverlayColor"], "#193341"
+            )
+            self.assertEqual(
+                applied_storage["titleBarOverlaySymbolColor"], "#EFE4D2"
+            )
+            self.assertEqual(
+                applied_storage["titleBarOverlaySurfaceColor"], "#162B37"
+            )
+
+            # Isolated Light-mode check confirming hubSurfaceBackgroundColor == #F3EFE8
+            light_config_path = tmp / "light_config" / "config.json"
+            light_storage_path = tmp / "light_storage" / "app_storage.json"
+            light_plugins_dir = tmp / "light_config" / "plugins"
+            light_config_path.parent.mkdir(parents=True, exist_ok=True)
+            light_storage_path.parent.mkdir(parents=True, exist_ok=True)
+            light_config_path.write_text(
+                json.dumps({"userSettings": {"themeMode": "THEME_MODE_LIGHT"}}, indent=2),
+                encoding="utf-8",
+            )
+            light_storage_path.write_text(json.dumps({}, indent=2), encoding="utf-8")
+            theme_cli.apply_theme(
+                BUNDLE_DIR,
+                light_config_path,
+                light_storage_path,
+                light_plugins_dir,
+                check_running=False,
+            )
+            light_applied_storage = json.loads(
+                light_storage_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                light_applied_storage["hubSurfaceBackgroundColor"], "#F3EFE8"
+            )
+            self.assertEqual(
+                light_applied_storage["titleBarOverlayColor"], "#F0E7D8"
+            )
+            self.assertEqual(
+                light_applied_storage["titleBarOverlaySymbolColor"], "#162B37"
+            )
+            self.assertEqual(
+                light_applied_storage["titleBarOverlaySurfaceColor"], "#F3EFE8"
             )
 
             installed_dir = plugins_dir / theme_cli.PLUGIN_SLUG
@@ -512,6 +690,12 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
             self.assertEqual(
                 uninstalled_storage["theme-preset-dark"], "Default Dark"
             )
+            for overlay_key in (
+                "titleBarOverlayColor",
+                "titleBarOverlaySymbolColor",
+                "titleBarOverlaySurfaceColor",
+            ):
+                self.assertNotIn(overlay_key, uninstalled_storage)
 
     def test_preview_html_offline(self) -> None:
         html_path = BUNDLE_DIR / "docs" / "bohemian-art-nouveau-preview.html"
@@ -531,6 +715,90 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
         self.assertIn("GA_GRUVBOX_SYNTAX", html)
         for token in EXPECTED_SYNTAX_KEYS:
             self.assertIn(token, html, f"Missing syntax token {token!r} in preview HTML")
+
+        html_upper = html.upper()
+        required_v2_hexes = (
+            # v2.0.0 seeds
+            "#F3EFE8",
+            "#EFE4D2",
+            "#D4A853",
+            # Stepped surfaces
+            "#F0E7D8",
+            "#F1EADD",
+            "#F2ECE3",
+            "#172E3A",
+            "#18313E",
+            "#193341",
+            # Semantic status tokens
+            "#47634D",
+            "#7A581B",
+            "#9A412A",
+            "#91A895",
+            "#D99330",
+            "#E6866B",
+            # 24-color ANSI terminal tokens
+            "#2E5E63",
+            "#6FA3B8",
+            "#7DB5A8",
+            "#E07A5F",
+        )
+        for hex_code in required_v2_hexes:
+            self.assertIn(hex_code, html_upper, f"Missing v2.0.0 hex {hex_code} in preview HTML")
+
+        self.assertNotIn("validate_theme.py", html)
+        self.assertIn("python3 -B -m unittest discover -s tests -v", html)
+        for legacy_label in ("Noto Serif Display", "Fira Sans", "Secessionist"):
+            self.assertNotIn(
+                legacy_label,
+                html,
+                f"Legacy ornamental/font string {legacy_label!r} found in preview HTML",
+            )
+        for modern_font in ("Newsreader", "Inter", "JetBrains Mono"):
+            self.assertIn(
+                modern_font,
+                html,
+                f"Expected modern font stack {modern_font!r} missing from preview HTML",
+            )
+
+        legacy_studio_chrome_hexes = {
+            "#11161B",
+            "#182026",
+            "#0D1216",
+            "#24333D",
+            "#ECE7DF",
+            "#9DA8B1",
+        }
+        found_hexes = {m.upper() for m in ANY_HEX_RE.findall(html)}
+        self.assertEqual(
+            found_hexes & legacy_studio_chrome_hexes,
+            set(),
+            f"Legacy studio chrome hexes found in preview HTML: {sorted(found_hexes & legacy_studio_chrome_hexes)}",
+        )
+
+        syntax_match = re.search(
+            r"const\s+BOHEMIAN_SYNTAX\s*=\s*(\{.*?\n\s*\});",
+            html,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(syntax_match, "BOHEMIAN_SYNTAX block not found in preview HTML")
+        json_like = re.sub(
+            r"(\b[A-Za-z_][A-Za-z0-9_]*)\s*:",
+            r'"\1":',
+            syntax_match.group(1),
+        )
+        preview_syntax = json.loads(json_like)
+        light_theme = json.loads(
+            (BUNDLE_DIR / "themes" / "bohemian-art-nouveau-light.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        dark_theme = json.loads(
+            (BUNDLE_DIR / "themes" / "bohemian-art-nouveau-dark.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(preview_syntax["light"], light_theme["syntax"])
+        self.assertEqual(preview_syntax["dark"], dark_theme["syntax"])
 
     def test_no_pii_in_publishable_bundle(self) -> None:
         GENERIC_CI_USERNAMES = {
@@ -569,11 +837,30 @@ class BohemianArtNouveauThemeTests(unittest.TestCase):
             ),
         ]
 
+        BINARY_SUFFIXES = {
+            ".pyc",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".webp",
+            ".ico",
+            ".pdf",
+            ".zip",
+            ".gz",
+            ".tar",
+            ".woff",
+            ".woff2",
+        }
         findings: list[str] = []
         for path in sorted(BUNDLE_DIR.rglob("*")):
             if not path.is_file():
                 continue
-            if ".git" in path.parts or "__pycache__" in path.parts or path.suffix == ".pyc":
+            if (
+                ".git" in path.parts
+                or "__pycache__" in path.parts
+                or path.suffix.lower() in BINARY_SUFFIXES
+            ):
                 continue
 
             text = path.read_text(encoding="utf-8")
